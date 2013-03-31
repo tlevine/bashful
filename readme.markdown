@@ -69,7 +69,6 @@ functions you can list by typing `help` in a real bash shell.
 * `getopts optstring name [arg]`
 * `hash [-lr] [-p pathname] [-dt] [name >`
 * `help [-dms] [pattern ...]`
-* ``
 * `history [-c] [-d offset] [n] or hist>`
 * `if COMMANDS; then COMMANDS; [ elif C>`
 * `jobs [-lnprs] [jobspec ...] or jobs >`
