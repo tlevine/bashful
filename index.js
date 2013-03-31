@@ -2,7 +2,7 @@ var split = require('split');
 var through = require('through');
 var duplexer = require('duplexer');
 var shellQuote = require('shell-quote');
-var shellExpand = require('./expand');
+var shellExpand = require('./lib/expand');
 
 module.exports = Bash;
 
