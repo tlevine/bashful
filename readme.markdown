@@ -1,6 +1,6 @@
 # bashful
 
-Implement bash javascript without doing any IO
+Parse and execute bash in javascript without doing any IO
 so you can use your own IO backend.
 
 # example
