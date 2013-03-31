@@ -2,6 +2,7 @@ var split = require('split');
 var through = require('through');
 var duplexer = require('duplexer');
 var shellQuote = require('shell-quote');
+var shellExpand = require('./expand');
 
 module.exports = Bash;
 
@@ -32,16 +33,18 @@ Bash.prototype.createStream = function () {
 };
 
 Bash.prototype.exec = function (line) {
+    var self = this;
     if (!/\S+/.test(line)) {
-        return builtins.echo.call(this, [ '-n' ]);
+        return builtins.echo.call(self, [ '-n' ]);
     }
-    var parts = shellQuote.parse(line);
+    
+    var parts = shellQuote.parse(shellExpand(line, self.env));
     var cmd = parts[0], args = parts.slice(1);
     if (builtins[cmd]) {
-        return builtins[cmd].call(this, args);
+        return builtins[cmd].call(self, args);
     }
     else {
-        return builtins.echo.call(this, [
+        return builtins.echo.call(self, [
             'No command "' + cmd + '" found'
         ]);
     }
