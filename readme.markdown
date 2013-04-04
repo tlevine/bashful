@@ -6,7 +6,9 @@ so you can use your own IO backend.
 # example
 
 ``` js
-var bash = require('bashful')(process.env);
+var bash = require('../')(process.env);
+bash.on('command', require('child_process').spawn);
+
 var s = bash.createStream();
 process.stdin.pipe(s).pipe(process.stdout);
 ```
@@ -21,6 +23,29 @@ $ beep boop
 No command "beep" found
 ```
 
+# methods
+
+``` js
+var bash = require('bashfule')
+```
+
+## bash.createStream()
+
+Create a duplex stream for the interpreter.
+
+# events
+
+## bash.on('command', function cb (cmd, args, opts) {})
+
+When the stream parses a non-builtin command, this event fires with the command
+`cmd`, its arguments `args` and the `opts.env` and `opts.cwd` of the current
+bash instance that can be passed directly into node core's
+`child_process.spawn()`.
+
+If the `cb` listener wants to provide an implementation of the command `cmd`, it
+should return a duplex stream or an object with `"stdin"`, `"stdout"`, and
+optionally `"stderr"` streams.
+
 # status
 
 The scope of this module is to only support the internally-defined bash
@@ -28,6 +53,7 @@ functions you can list by typing `help` in a real bash shell.
 
 ## implemented
 
+* filename [arguments]
 * `echo [-neE] [arg ...]`
 
 ## not yet implemented

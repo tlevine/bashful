@@ -4,6 +4,9 @@ var duplexer = require('duplexer');
 var shellQuote = require('shell-quote');
 var shellExpand = require('./lib/expand');
 
+var EventEmitter = require('events').EventEmitter;
+var inherits = require('inherits');
+
 module.exports = Bash;
 
 function Bash (env) {
@@ -11,6 +14,8 @@ function Bash (env) {
     this.env = env || {};
     if (this.env.PS1 === undefined) this.env.PS1 = '$ ';
 }
+
+inherits(Bash, EventEmitter);
 
 Bash.prototype.createStream = function () {
     var self = this;
@@ -24,12 +29,30 @@ Bash.prototype.createStream = function () {
     
     sp.pipe(through(function (line) {
         var p = self.exec(line);
-        p.pipe(output, { end: false });
-        p.on('end', function () {
-            output.queue(self.env.PS1);
-        });
+        if (p.stdout) {
+            p.stdout.pipe(output, { end: false });
+            p.on('exit', function () {
+                output.queue(self.env.PS1);
+            });
+        }
+        else {
+            p.pipe(output, { end: false });
+            p.on('end', function () {
+                output.queue(self.env.PS1);
+            });
+        }
     }));
     return duplexer(sp, output);
+};
+
+Bash.prototype.emit = function (name) {
+    var self = this;
+    var args = [].slice.call(arguments, 1);
+    var res;
+    this.listeners(name).forEach(function (fn) {
+        res = res || fn.apply(self, args);
+    });
+    return res;
 };
 
 Bash.prototype.exec = function (line) {
@@ -43,11 +66,16 @@ Bash.prototype.exec = function (line) {
     if (builtins[cmd]) {
         return builtins[cmd].call(self, args);
     }
-    else {
-        return builtins.echo.call(self, [
-            'No command "' + cmd + '" found'
-        ]);
-    }
+    
+    var res = self.emit('command', cmd, args, {
+        env: self.env,
+        cwd: self.env.PWD
+    });
+    if (res) return res;
+    
+    return builtins.echo.call(self, [
+        'No command "' + cmd + '" found'
+    ]);
 };
 
 var builtins = Bash.builtins = {};
