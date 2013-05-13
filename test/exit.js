@@ -32,7 +32,7 @@ test('true and echo $?', function (t) {
         t.equal(src, '$ 0\n');
         t.equal(env['$?'], 0);
     }));
-    s.end('true && echo $?\n');
+    s.end('true; echo $?\n');
 });
 
 function run (cmd, args) {

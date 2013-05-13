@@ -74,6 +74,8 @@ Bash.prototype.exec = function (line) {
     }
     
     (function run (code) {
+        self.env['$?'] = code;
+        
         var c = commands.shift();
         if (!c) return output.queue(null);
         var cmd = c.command;
