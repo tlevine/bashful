@@ -81,8 +81,10 @@ Bash.prototype.exec = function (line) {
         var op = c.op;
         
         if (op === '&&' && code !== 0) {
-            output.queue(null);
-            return;
+            return output.queue(null);
+        }
+        if (op === '||' && code === 0) {
+            return output.queue(null);
         }
         
         if (builtins[cmd]) {
