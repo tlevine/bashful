@@ -86,11 +86,19 @@ Bash.prototype.exec = function (line) {
         }
     }
     
-    (function run (code) {
+    (function run (code, out) {
         self.env['?'] = code;
         
         var c = commands.shift();
         if (!c) return output.queue(null);
+        var next = null;
+        
+        if (commands[0] && commands[0].op === '|') {
+            next = run(0, out);
+            out = through();
+            out.pipe(next);
+        }
+        
         var cmd = c.command;
         if (typeof cmd === 'object' && cmd.env) {
             cmd = self.env[cmd.env];
@@ -106,46 +114,58 @@ Bash.prototype.exec = function (line) {
         var op = c.op;
         
         if (op === '&&' && code !== 0) {
-            return run(1);
+            return run(1, out);
         }
         if (op === '||' && code === 0) {
-            return run(1);
+            return run(1, out);
         }
         
         if (builtins[cmd] && self.custom.indexOf(cmd) < 0) {
             var b = builtins[cmd].call(self, args);
             b.on('data', function () {});
             b.on('end', function () {
-                output.queue(null);
+                if (next) out.queue(null);
+                run(0, out);
+                //output.queue(null);
             });
-            b.pipe(output, { end: false });
-            return;
+            b.pipe(out, { end: false });
+            return b;
         }
         
         var res = self.emit('command', cmd, args, {
             env: self.env,
             cwd: self.env.PWD
         });
+        var input;
+        
         if (res && (res.stdout || res.stderr)) {
-            if (res.stdout) res.stdout.pipe(output, { end: false });
-            if (res.stderr) res.stderr.pipe(output, { end: false });
-            res.on('close', run);
+            if (res.stdin) input = res.stdin;
+            if (res.stdout) res.stdout.pipe(out, { end: false });
+            if (res.stderr) res.stderr.pipe(out, { end: false });
+            res.on('close', function (code) {
+                if (next) out.queue(null);
+                run(code, out);
+            });
         }
         else if (res) {
+            input = res;
             res.on('data', function () {});
             var exit = 0;
             res.on('error', function () { exit = 1 });
             res.on('end', function () {
-                nextTick(function () { run(exit) });
+                if (next) out.queue(null);
+                nextTick(function () { run(exit, out) });
             });
             res.on('exit', function (ecode) { exit = ecode });
-            res.pipe(output, { end: false });
+            res.pipe(out, { end: false });
         }
         else {
-            output.queue('No command "' + cmd + '" found\n');
-            run(1);
+            input = through();
+            out.queue('No command "' + cmd + '" found\n');
+            run(1, out);
         }
-    })(0);
+        return input;
+    })(0, output);
     
     return output;
 };

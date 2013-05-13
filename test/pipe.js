@@ -12,7 +12,7 @@ test('run', function (t) {
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
         t.equal(src, [
-            '$ 8',
+            '$ 10',
             '$ '
         ].join('\n'));
     }));
