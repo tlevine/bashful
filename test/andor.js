@@ -39,6 +39,23 @@ test('false and', function (t) {
     s.end('false && echo $XYZ\n');
 });
 
+test('false or', function (t) {
+    t.plan(1);
+    
+    var sh = bash({ XYZ: 'abcdefg' });
+    sh.on('command', run);
+    
+    var s = sh.createStream();
+    s.pipe(concat(function (err, src) {
+        t.equal(src, [
+            '$ FALSE',
+            'abcdefg',
+            '$ '
+        ].join('\n'));
+    }));
+    s.end('false || echo $XYZ\n');
+});
+
 function run (cmd, args) {
     var tr = through();
     tr.pause();
