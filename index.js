@@ -35,7 +35,7 @@ Bash.prototype.createStream = function () {
         
         if (p.stdout) {
             p.stdout.pipe(output, { end: false });
-            p.on('exit', function () {
+            p.on('close', function () {
                 output.queue(self.env.PS1);
                 sp.resume();
             });
