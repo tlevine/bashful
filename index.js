@@ -73,7 +73,7 @@ Bash.prototype.exec = function (line) {
         }
     }
     
-    (function run () {
+    (function run (code) {
         var c = commands.shift();
         if (!c) return output.queue(null);
         var cmd = c.command;
@@ -100,16 +100,17 @@ Bash.prototype.exec = function (line) {
         }
         else if (res) {
             res.on('data', function () {});
-            res.on('end', run);
+            var exit = 0;
+            res.on('error', function () { exit = 1 });
+            res.on('end', function () {
+                nextTick(function () { run(exit) });
+            });
+            res.on('exit', function (ecode) { exit = ecode });
             res.pipe(output, { end: false });
         }
         else {
-            var echo = builtins.echo.call(self, [
-                'No command "' + cmd + '" found'
-            ]);
-            echo.on('data', function () {});
-            echo.on('end', run);
-            echo.pipe(output, { end: false });
+            output.queue('No command "' + cmd + '" found\n');
+            run(1);
         }
     })();
     
