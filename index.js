@@ -23,32 +23,23 @@ inherits(Bash, EventEmitter);
 Bash.prototype.createStream = function () {
     var self = this;
     var sp = split();
-    sp.on('end', function () { output.queue(null) });
     
-    var output = through();
-    resumeNext(output);
+    var output = resumer();
     output.queue(self.env.PS1);
     
-    sp.pipe(through(function (line) {
+    sp.pipe(through(write, end));
+    return duplexer(sp, output);
+    function write (line) {
         var p = self.exec(line);
         sp.pause();
-        
-        if (p.stdout) {
-            p.stdout.pipe(output, { end: false });
-            p.on('close', function () {
-                output.queue(self.env.PS1);
-                sp.resume();
-            });
-        }
-        else {
-            p.pipe(output, { end: false });
-            p.on('end', function () {
-                output.queue(self.env.PS1);
-                sp.resume();
-            });
-        }
-    }));
-    return duplexer(sp, output);
+        p.on('data', function () {});
+        p.on('end', function () {
+            output.queue(self.env.PS1);
+            sp.resume();
+        });
+        p.pipe(output, { end: false });
+    }
+    function end () { output.queue(null) }
 };
 
 Bash.prototype.emit = function (name) {
@@ -66,29 +57,67 @@ Bash.prototype.exec = function (line) {
     if (!/\S+/.test(line)) {
         return builtins.echo.call(self, [ '-n' ]);
     }
+    var output = resumer();
     
     var parts = shellQuote.parse(line, self.env);
-    var cmd = parts[0], args = parts.slice(1);
-    if (builtins[cmd]) {
-        return builtins[cmd].call(self, args);
+    var commands = [ { op: ';', args: [] } ];
+    
+    for (var i = 0; i < parts.length; i++) {
+        if (typeof parts[i] === 'object') {
+            commands.push({ op: parts[i].op, args: [] });
+        }
+        var cmd = commands[commands.length-1];
+        if (cmd.command === undefined) cmd.command = parts[i];
+        else cmd.args.push(parts[i]);
     }
     
-    var res = self.emit('command', cmd, args, {
-        env: self.env,
-        cwd: self.env.PWD
-    });
-    if (res) return res;
+    (function run () {
+        var c = commands.shift();
+        if (!c) return output.queue(null);
+        var cmd = c.command;
+        var args = c.args;
+        
+        if (builtins[cmd]) {
+            var b = builtins[cmd].call(self, args);
+            b.on('data', function () {});
+            b.on('end', function () {
+                output.queue(null);
+            });
+            b.pipe(output, { end: false });
+            return;
+        }
+        
+        var res = self.emit('command', cmd, args, {
+            env: self.env,
+            cwd: self.env.PWD
+        });
+        if (res && (res.stdout || res.stderr)) {
+            if (res.stdout) res.stdout.pipe(output, { end: false });
+            if (res.stderr) res.stderr.pipe(output, { end: false });
+            res.on('close', run);
+        }
+        else if (res) {
+            res.on('data', function () {});
+            res.on('end', run);
+            res.pipe(output, { end: false });
+        }
+        else {
+            var echo = builtins.echo.call(self, [
+                'No command "' + cmd + '" found'
+            ]);
+            echo.on('data', function () {});
+            echo.on('end', run);
+            echo.pipe(output, { end: false });
+        }
+    })();
     
-    return builtins.echo.call(self, [
-        'No command "' + cmd + '" found'
-    ]);
+    return output;
 };
 
 var builtins = Bash.builtins = {};
 builtins.exec = Bash.prototype.exec;
 builtins.echo = function (args) {
-    var tr = through();
-    resumeNext(tr);
+    var tr = resumer();
     
     var opts = { newline: true, 'escape': false };
     for (var i = 0; i < args.length; i++) {
@@ -113,7 +142,8 @@ builtins.echo = function (args) {
     return tr;
 };
 
-function resumeNext (tr) {
+function resumer () {
+    var tr = through();
     tr.pause();
     var resume = tr.resume;
     var pause = tr.pause;
@@ -132,4 +162,6 @@ function resumeNext (tr) {
     nextTick(function () {
         if (!paused) tr.resume();
     });
+    
+    return tr;
 }
