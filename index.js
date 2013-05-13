@@ -59,27 +59,38 @@ Bash.prototype.exec = function (line) {
     }
     var output = resumer();
     
-    var parts = shellQuote.parse(line, self.env);
+    var parts = shellQuote.parse(line, function (key) {
+        return { env: key };
+    });
     var commands = [ { op: ';', args: [] } ];
     
     for (var i = 0; i < parts.length; i++) {
-        if (typeof parts[i] === 'object') {
+        if (typeof parts[i] === 'object' && parts[i].op) {
             commands.push({ op: parts[i].op, args: [] });
         }
         else {
             var cmd = commands[commands.length-1];
-            if (cmd.command === undefined) cmd.command = parts[i];
+            if (cmd.command === undefined) {
+                cmd.command = parts[i];
+            }
             else cmd.args.push(parts[i]);
         }
     }
     
     (function run (code) {
-        self.env['$?'] = code;
+        self.env['?'] = code;
         
         var c = commands.shift();
         if (!c) return output.queue(null);
         var cmd = c.command;
-        var args = c.args;
+        if (typeof cmd === 'object' && cmd.env) {
+            cmd = self.env[cmd.env];
+        }
+        var args = c.args.map(function (arg) {
+            if (typeof arg === 'object' && arg.env) {
+                return self.env[arg.env];
+            }
+        }).filter(Boolean);
         var op = c.op;
         
         if (op === '&&' && code !== 0) {

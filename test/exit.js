@@ -15,12 +15,12 @@ test('true $?', function (t) {
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(env['$?'], 0);
+        t.equal(env['?'], 0);
     }));
     s.end('true\n');
 });
 
-test('true and echo $?', function (t) {
+test('true; echo $?', function (t) {
     t.plan(2);
     
     var env = {};
@@ -29,10 +29,25 @@ test('true and echo $?', function (t) {
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(src, '$ 0\n');
-        t.equal(env['$?'], 0);
+        t.equal(src, '$ 0\n$ ');
+        t.equal(env['?'], 0);
     }));
     s.end('true; echo $?\n');
+});
+
+test('false; echo $?', function (t) {
+    t.plan(2);
+    
+    var env = {};
+    var sh = bash(env);
+    sh.on('command', run);
+    
+    var s = sh.createStream();
+    s.pipe(concat(function (err, src) {
+        t.equal(src, '$ 1\n$ ');
+        t.equal(env['?'], 1);
+    }));
+    s.end('false; echo $?\n');
 });
 
 function run (cmd, args) {
