@@ -15,13 +15,13 @@ test('run', function (t) {
             '$ /home/test',
             '$ boop',
             '$ abcdefg',
-            ''
+            '$ '
         ].join('\n'));
     }));
     s.write('pwd\n');
     s.write('beep\n');
     s.write('echo $XYZ\n');
-    setTimeout(function () { s.end(); }, 50);
+    setTimeout(function () { s.end() }, 50);
 });
 
 function run (cmd, args) {
@@ -32,6 +32,7 @@ function run (cmd, args) {
         'beep': 'boop\n',
         'echo': args.join(' ') + '\n'
     }[cmd]);
+    tr.queue(null);
     
     process.nextTick(function () {
         tr.resume();

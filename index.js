@@ -6,6 +6,9 @@ var shellExpand = require('./lib/expand');
 
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('inherits');
+var nextTick = typeof setImmediate === 'function'
+    ? setImmediate : process.nextTick
+;
 
 module.exports = Bash;
 
@@ -23,22 +26,25 @@ Bash.prototype.createStream = function () {
     sp.on('end', function () { output.queue(null) });
     
     var output = through();
-    process.nextTick(function () {
-        output.queue(self.env.PS1);
-    });
+    resumeNext(output);
+    output.queue(self.env.PS1);
     
     sp.pipe(through(function (line) {
         var p = self.exec(line);
+        sp.pause();
+        
         if (p.stdout) {
             p.stdout.pipe(output, { end: false });
             p.on('exit', function () {
                 output.queue(self.env.PS1);
+                sp.resume();
             });
         }
         else {
             p.pipe(output, { end: false });
             p.on('end', function () {
                 output.queue(self.env.PS1);
+                sp.resume();
             });
         }
     }));
@@ -82,6 +88,8 @@ var builtins = Bash.builtins = {};
 builtins.exec = Bash.prototype.exec;
 builtins.echo = function (args) {
     var tr = through();
+    resumeNext(tr);
+    
     var opts = { newline: true, 'escape': false };
     for (var i = 0; i < args.length; i++) {
         if (args[i] === '-n') {
@@ -98,10 +106,30 @@ builtins.echo = function (args) {
         }
     }
     
-    process.nextTick(function () {
-        if (args.length) tr.queue(args.join(' '));
-        if (opts.newline) tr.queue('\n');
-        tr.queue(null);
-    });
+    if (args.length) tr.queue(args.join(' '));
+    if (opts.newline) tr.queue('\n');
+    tr.queue(null);
+    
     return tr;
 };
+
+function resumeNext (tr) {
+    tr.pause();
+    var resume = tr.resume;
+    var pause = tr.pause;
+    var paused = false;
+    
+    tr.pause = function () {
+        paused = true;
+        return pause.apply(this, arguments);
+    };
+    
+    tr.resume = function () {
+        paused = false;
+        return resume.apply(this, arguments);
+    };
+    
+    nextTick(function () {
+        if (!paused) tr.resume();
+    });
+}
