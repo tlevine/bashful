@@ -66,9 +66,11 @@ Bash.prototype.exec = function (line) {
         if (typeof parts[i] === 'object') {
             commands.push({ op: parts[i].op, args: [] });
         }
-        var cmd = commands[commands.length-1];
-        if (cmd.command === undefined) cmd.command = parts[i];
-        else cmd.args.push(parts[i]);
+        else {
+            var cmd = commands[commands.length-1];
+            if (cmd.command === undefined) cmd.command = parts[i];
+            else cmd.args.push(parts[i]);
+        }
     }
     
     (function run () {

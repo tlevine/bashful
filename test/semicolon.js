@@ -13,8 +13,8 @@ test('run', function (t) {
     s.pipe(concat(function (err, src) {
         t.equal(src, [
             '$ /home/test',
-            '$ boop',
-            '$ abcdefg',
+            'boop',
+            'abcdefg',
             '$ '
         ].join('\n'));
     }));
