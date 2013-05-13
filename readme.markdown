@@ -3,6 +3,8 @@
 Parse and execute bash in javascript without doing any IO
 so you can use your own IO backend.
 
+[![build status](https://secure.travis-ci.org/substack/bashful.png)](http://travis-ci.org/substack/bashful)
+
 # example
 
 ``` js
