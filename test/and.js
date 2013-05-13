@@ -23,6 +23,22 @@ test('true and', function (t) {
     s.end('true && echo $XYZ\n');
 });
 
+test('false and', function (t) {
+    t.plan(1);
+    
+    var sh = bash({ XYZ: 'abcdefg' });
+    sh.on('command', run);
+    
+    var s = sh.createStream();
+    s.pipe(concat(function (err, src) {
+        t.equal(src, [
+            '$ FALSE',
+            '$ '
+        ].join('\n'));
+    }));
+    s.end('false && echo $XYZ\n');
+});
+
 function run (cmd, args) {
     var tr = through();
     tr.pause();
@@ -30,6 +46,14 @@ function run (cmd, args) {
         tr.queue('TRUE\n');
         process.nextTick(function () {
             tr.emit('exit', 0);
+            tr.queue(null);
+            tr.resume();
+        });
+    }
+    else if (cmd === 'false') {
+        tr.queue('FALSE\n');
+        process.nextTick(function () {
+            tr.emit('exit', 1);
             tr.queue(null);
             tr.resume();
         });
