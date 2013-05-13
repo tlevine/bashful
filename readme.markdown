@@ -57,6 +57,8 @@ functions you can list by typing `help` in a real bash shell.
 * `$?`
 * filename [arguments]
 * `echo [-neE] [arg ...]`
+* `false`
+* `true`
 
 ## not yet implemented
 
@@ -88,7 +90,6 @@ functions you can list by typing `help` in a real bash shell.
 * `exec [-cl] [-a name] [command [argume>`
 * `exit [n]`
 * `export [-fn] [name[=value] ...] or ex>`
-* `false`
 * `fc [-e ename] [-lnr] [first] [last] o>`
 * `fg [job_spec]`
 * `for NAME [in WORDS ... ] ; do COMMAND>`
@@ -123,7 +124,6 @@ functions you can list by typing `help` in a real bash shell.
 * `time [-p] pipeline`
 * `times`
 * `trap [-lp] [[arg] signal_spec ...]`
-* `true`
 * `type [-afptP] name [name ...]`
 * `typeset [-aAfFgilrtux] [-p] name[=va>`
 * `ulimit [-SHacdefilmnpqrstuvx] [limit>`
