@@ -120,23 +120,16 @@ Bash.prototype.exec = function (line) {
             return run(1, out);
         }
         
+        var res, input;
         if (builtins[cmd] && self.custom.indexOf(cmd) < 0) {
-            var b = builtins[cmd].call(self, args);
-            b.on('data', function () {});
-            b.on('end', function () {
-                if (next) out.queue(null);
-                run(0, out);
-                //output.queue(null);
-            });
-            b.pipe(out, { end: false });
-            return b;
+            res = builtins[cmd].call(self, args);
         }
-        
-        var res = self.emit('command', cmd, args, {
-            env: self.env,
-            cwd: self.env.PWD
-        });
-        var input;
+        else {
+            res = self.emit('command', cmd, args, {
+                env: self.env,
+                cwd: self.env.PWD
+            });
+        }
         
         if (res && (res.stdout || res.stderr)) {
             if (res.stdin) input = res.stdin;

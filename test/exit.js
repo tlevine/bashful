@@ -21,8 +21,23 @@ test('true $?', function (t) {
     s.end('true\n');
 });
 
+test('false $?', function (t) {
+    t.plan(1);
+    
+    var env = {};
+    var sh = bash(env);
+    sh.override([ 'true', 'false' ]);
+    sh.on('command', run);
+    
+    var s = sh.createStream();
+    s.pipe(concat(function (err, src) {
+        t.equal(env['?'], 1);
+    }));
+    s.end('false\n');
+});
+
 test('true; echo $?', function (t) {
-    t.plan(2);
+    t.plan(1);
     
     var env = {};
     var sh = bash(env);
@@ -32,13 +47,12 @@ test('true; echo $?', function (t) {
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
         t.equal(src, '$ 0\n$ ');
-        t.equal(env['?'], 0);
     }));
     s.end('true; echo $?\n');
 });
 
 test('false; echo $?', function (t) {
-    t.plan(2);
+    t.plan(1);
     
     var env = {};
     var sh = bash(env);
@@ -48,7 +62,6 @@ test('false; echo $?', function (t) {
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
         t.equal(src, '$ 1\n$ ');
-        t.equal(env['?'], 1);
     }));
     s.end('false; echo $?\n');
 });
