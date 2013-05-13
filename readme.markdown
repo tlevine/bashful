@@ -55,7 +55,7 @@ functions you can list by typing `help` in a real bash shell.
 
 ## implemented
 
-* `&&`, `;`, `||`
+* `&&`, `;`, `||`, `|`
 * `$?`
 * filename [arguments]
 * `echo [-neE] [arg ...]`
