@@ -21,7 +21,7 @@ test('run', function (t) {
     s.write('pwd\n');
     s.write('beep\n');
     s.write('echo $XYZ\n');
-    setTimeout(function () { s.end() }, 50);
+    s.end();
 });
 
 function run (cmd, args) {
