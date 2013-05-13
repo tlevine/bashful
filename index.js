@@ -81,10 +81,10 @@ Bash.prototype.exec = function (line) {
         var op = c.op;
         
         if (op === '&&' && code !== 0) {
-            return output.queue(null);
+            return run(1);
         }
         if (op === '||' && code === 0) {
-            return output.queue(null);
+            return run(1);
         }
         
         if (builtins[cmd]) {
