@@ -16,9 +16,18 @@ function Bash (env) {
     if (!(this instanceof Bash)) return new Bash(env);
     this.env = env || {};
     if (this.env.PS1 === undefined) this.env.PS1 = '$ ';
+    this.custom = [];
 }
 
 inherits(Bash, EventEmitter);
+
+Bash.prototype.override = function (cmd) {
+    var self = this;
+    [].concat(cmd).forEach(function (c) {
+        self.custom.push(c);
+    });
+    return self;
+};
 
 Bash.prototype.createStream = function () {
     var self = this;
@@ -102,7 +111,7 @@ Bash.prototype.exec = function (line) {
             return run(1);
         }
         
-        if (builtins[cmd]) {
+        if (builtins[cmd] && self.custom.indexOf(cmd) < 0) {
             var b = builtins[cmd].call(self, args);
             b.on('data', function () {});
             b.on('end', function () {

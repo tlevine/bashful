@@ -11,6 +11,7 @@ test('true $?', function (t) {
     
     var env = {};
     var sh = bash(env);
+    sh.override([ 'true', 'false' ]);
     sh.on('command', run);
     
     var s = sh.createStream();
@@ -25,6 +26,7 @@ test('true; echo $?', function (t) {
     
     var env = {};
     var sh = bash(env);
+    sh.override([ 'true', 'false' ]);
     sh.on('command', run);
     
     var s = sh.createStream();
@@ -40,6 +42,7 @@ test('false; echo $?', function (t) {
     
     var env = {};
     var sh = bash(env);
+    sh.override([ 'true', 'false' ]);
     sh.on('command', run);
     
     var s = sh.createStream();

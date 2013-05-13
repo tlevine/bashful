@@ -10,6 +10,7 @@ test('true and', function (t) {
     t.plan(1);
     
     var sh = bash({ XYZ: 'abcdefg' });
+    sh.override([ 'true', 'false' ]);
     sh.on('command', run);
     
     var s = sh.createStream();
@@ -27,6 +28,7 @@ test('false and', function (t) {
     t.plan(1);
     
     var sh = bash({ XYZ: 'abcdefg' });
+    sh.override([ 'true', 'false' ]);
     sh.on('command', run);
     
     var s = sh.createStream();
@@ -43,6 +45,7 @@ test('false or', function (t) {
     t.plan(1);
     
     var sh = bash({ XYZ: 'abcdefg' });
+    sh.override([ 'true', 'false' ]);
     sh.on('command', run);
     
     var s = sh.createStream();
@@ -60,6 +63,7 @@ test('true or', function (t) {
     t.plan(1);
     
     var sh = bash({ XYZ: 'abcdefg' });
+    sh.override([ 'true', 'false' ]);
     sh.on('command', run);
     
     var s = sh.createStream();
@@ -76,6 +80,7 @@ test('false and true or', function (t) {
     t.plan(1);
     
     var sh = bash({ XYZ: 'abcdefg' });
+    sh.override([ 'true', 'false' ]);
     sh.on('command', run);
     
     var s = sh.createStream();
@@ -93,6 +98,7 @@ test('false or true and', function (t) {
     t.plan(1);
     
     var sh = bash({ XYZ: 'abcdefg' });
+    sh.override([ 'true', 'false' ]);
     sh.on('command', run);
     
     var s = sh.createStream();
@@ -111,6 +117,7 @@ test('false or false and', function (t) {
     t.plan(1);
     
     var sh = bash({ XYZ: 'abcdefg' });
+    sh.override([ 'true', 'false' ]);
     sh.on('command', run);
     
     var s = sh.createStream();
