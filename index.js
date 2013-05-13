@@ -67,7 +67,7 @@ Bash.prototype.exec = function (line) {
         return builtins.echo.call(self, [ '-n' ]);
     }
     
-    var parts = shellQuote.parse(shellExpand(line, self.env));
+    var parts = shellQuote.parse(line, self.env);
     var cmd = parts[0], args = parts.slice(1);
     if (builtins[cmd]) {
         return builtins[cmd].call(self, args);
