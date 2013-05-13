@@ -101,6 +101,7 @@ Bash.prototype.exec = function (line) {
                 if (r === undefined) r = '';
                 return String(r);
             }
+            else return arg;
         }).filter(Boolean);
         var op = c.op;
         
