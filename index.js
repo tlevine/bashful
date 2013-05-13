@@ -168,6 +168,28 @@ builtins.echo = function (args) {
     return tr;
 };
 
+builtins['true'] = function (args) {
+    var tr = through();
+    tr.pause();
+    nextTick(function () {
+        tr.emit('exit', 0);
+        tr.queue(null);
+        tr.resume();
+    });
+    return tr;
+};
+
+builtins['false'] = function (args) {
+    var tr = through();
+    tr.pause();
+    nextTick(function () {
+        tr.emit('exit', 1);
+        tr.queue(null);
+        tr.resume();
+    });
+    return tr;
+};
+
 function resumer () {
     var tr = through();
     tr.pause();
