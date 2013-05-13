@@ -88,7 +88,9 @@ Bash.prototype.exec = function (line) {
         }
         var args = c.args.map(function (arg) {
             if (typeof arg === 'object' && arg.env) {
-                return self.env[arg.env];
+                var r = self.env[arg.env];
+                if (r === undefined) r = '';
+                return String(r);
             }
         }).filter(Boolean);
         var op = c.op;
