@@ -78,6 +78,12 @@ Bash.prototype.exec = function (line) {
         if (!c) return output.queue(null);
         var cmd = c.command;
         var args = c.args;
+        var op = c.op;
+        
+        if (op === '&&' && code !== 0) {
+            output.queue(null);
+            return;
+        }
         
         if (builtins[cmd]) {
             var b = builtins[cmd].call(self, args);
@@ -112,7 +118,7 @@ Bash.prototype.exec = function (line) {
             output.queue('No command "' + cmd + '" found\n');
             run(1);
         }
-    })();
+    })(0);
     
     return output;
 };
