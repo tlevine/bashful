@@ -72,6 +72,58 @@ test('true or', function (t) {
     s.end('true || echo $XYZ\n');
 });
 
+test('false and true or', function (t) {
+    t.plan(1);
+    
+    var sh = bash({ XYZ: 'abcdefg' });
+    sh.on('command', run);
+    
+    var s = sh.createStream();
+    s.pipe(concat(function (err, src) {
+        t.equal(src, [
+            '$ FALSE',
+            'abcdefg',
+            '$ '
+        ].join('\n'));
+    }));
+    s.end('false && true || echo $XYZ\n');
+});
+
+test('false or true and', function (t) {
+    t.plan(1);
+    
+    var sh = bash({ XYZ: 'abcdefg' });
+    sh.on('command', run);
+    
+    var s = sh.createStream();
+    s.pipe(concat(function (err, src) {
+        t.equal(src, [
+            '$ FALSE',
+            'TRUE',
+            'abcdefg',
+            '$ '
+        ].join('\n'));
+    }));
+    s.end('false || true && echo $XYZ\n');
+});
+
+test('false or false and', function (t) {
+    t.plan(1);
+    
+    var sh = bash({ XYZ: 'abcdefg' });
+    sh.on('command', run);
+    
+    var s = sh.createStream();
+    s.pipe(concat(function (err, src) {
+        t.equal(src, [
+            '$ FALSE',
+            'FALSE',
+            '$ '
+        ].join('\n'));
+    }));
+    s.end('false || false && echo $XYZ\n');
+});
+
 function run (cmd, args) {
     var tr = through();
     tr.pause();
