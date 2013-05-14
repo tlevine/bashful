@@ -41,7 +41,7 @@ ONE TWO THREE
 # methods
 
 ``` js
-var bash = require('bashfule')
+var bash = require('bashful')
 ```
 
 ## bash.createStream()

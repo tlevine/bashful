@@ -11,7 +11,7 @@ var mkdirp = require('mkdirp');
 var tempfile = path.join(require('os').tmpDir(), 'bashful-test', Math.random());
 mkdirp.sync(path.dirname(tempfile));
 
-test('run', function (t) {
+test('echo > file', function (t) {
     t.plan(1);
     
     var sh = bash();
@@ -29,16 +29,3 @@ test('run', function (t) {
     s.write('cat ' + tempfile + '\n');
     s.end();
 });
-
-function run (cmd, args) {
-    if (cmd === 'wc' && args[0] === '-c') {
-        var count = 0;
-        var write = function (buf) { count += buf.length };
-        var end = function () {
-            this.queue(count + '\n');
-            this.queue(null);
-        };
-        var tr = through(write, end);
-        return tr;
-    }
-}
