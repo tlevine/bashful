@@ -1,7 +1,13 @@
 #!/usr/bin/env node
-var bash = require('../')(process.env);
-bash.on('command', require('child_process').spawn);
-bash.on('write', require('fs').createWriteStream);
+var bash = require('../');
+var fs = require('fs');
 
-var s = bash.createStream();
+var sh = bash({
+    env: process.env,
+    spawn: require('child_process').spawn,
+    write: fs.createWriteStream,
+    read: fs.createReadStream
+});
+
+var s = sh.createStream();
 process.stdin.pipe(s).pipe(process.stdout);
