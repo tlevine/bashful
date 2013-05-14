@@ -10,9 +10,11 @@ test('true $?', function (t) {
     t.plan(1);
     
     var env = {};
-    var sh = bash(env);
-    sh.override([ 'true', 'false' ]);
-    sh.on('command', run);
+    var sh = bash({
+        env: env,
+        command: run,
+        custom: [ 'true', 'false' ]
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -25,9 +27,11 @@ test('false $?', function (t) {
     t.plan(1);
     
     var env = {};
-    var sh = bash(env);
-    sh.override([ 'true', 'false' ]);
-    sh.on('command', run);
+    var sh = bash({
+        env: env,
+        command: run,
+        custom: [ 'true', 'false' ]
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -40,9 +44,11 @@ test('true; echo $?', function (t) {
     t.plan(1);
     
     var env = {};
-    var sh = bash(env);
-    sh.override([ 'true', 'false' ]);
-    sh.on('command', run);
+    var sh = bash({
+        env: env,
+        command: run,
+        custom: [ 'true', 'false' ]
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -55,9 +61,11 @@ test('false; echo $?', function (t) {
     t.plan(1);
     
     var env = {};
-    var sh = bash(env);
-    sh.override([ 'true', 'false' ]);
-    sh.on('command', run);
+    var sh = bash({
+        env: env,
+        command: run,
+        custom: [ 'true', 'false' ]
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {

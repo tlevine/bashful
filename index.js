@@ -17,7 +17,7 @@ function Bash (opts) {
     if (!opts) opts = {};
     this.env = opts.env || {};
     if (this.env.PS1 === undefined) this.env.PS1 = '$ ';
-    this.custom = [];
+    this.custom = opts.custom || [];
     
     this._reader = opts.read;
     this._writer = opts.write;
@@ -37,14 +37,6 @@ Bash.prototype._write = function (file) {
 Bash.prototype._command = function (cmd, args, opts) {
     this.emit('command', cmd, args, opts);
     if (this._commander) return this._commander(cmd, args, opts);
-};
-
-Bash.prototype.override = function (cmd) {
-    var self = this;
-    [].concat(cmd).forEach(function (c) {
-        self.custom.push(c);
-    });
-    return self;
 };
 
 Bash.prototype.createStream = function () {
