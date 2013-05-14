@@ -39,7 +39,7 @@ Bash.prototype.createStream = function () {
     sp.pipe(through(write, end));
     return duplexer(sp, output);
     function write (line) {
-        var p = self.exec(line);
+        var p = self.eval(line);
         sp.pause();
         p.on('data', function () {});
         p.on('end', function () {
@@ -61,7 +61,7 @@ Bash.prototype.emit = function (name) {
     return res;
 };
 
-Bash.prototype.exec = function (line) {
+Bash.prototype.eval = function (line) {
     var self = this;
     if (!/\S+/.test(line)) {
         return builtins.echo.call(self, [ '-n' ]);
@@ -71,35 +71,54 @@ Bash.prototype.exec = function (line) {
     var parts = shellQuote.parse(line, function (key) {
         return { env: key };
     });
-    var commands = [ { op: ';', args: [] } ];
+    var commands = [];
     
     for (var i = 0; i < parts.length; i++) {
         if (typeof parts[i] === 'object' && parts[i].op) {
-            commands.push({ op: parts[i].op, args: [] });
+            commands.push(parts[i]);
         }
         else {
             var cmd = commands[commands.length-1];
-            if (cmd.command === undefined) {
-                cmd.command = parts[i];
+            if (!cmd || !cmd.command) {
+                cmd = { command: parts[i], args: [] };
+                commands.push(cmd);
             }
             else cmd.args.push(parts[i]);
         }
     }
     
-    (function run (code, out) {
-        self.env['?'] = code;
+    self.env['?'] = 0;
+    (function run () {
+        if (commands.length === 0) {
+            return nextTick(function () {
+                output.emit('exit', self.env['?']);
+                output.queue(null);
+            });
+        }
+        var cmd = shiftCommand();
         
-        var c = commands.shift();
-        if (!c) return output.queue(null);
-        var next = null;
-        
-        if (commands[0] && commands[0].op === '|') {
-            next = run(0, out);
-            out = through();
-            out.pipe(next);
+        while (commands[0] && commands[0].op === '|') {
+            cmd = cmd.pipe(shiftCommand());
         }
         
+        var exitCode = 0;
+        cmd.pipe(output, { end: false });
+        
+        cmd.on('exit', function (code) { exitCode = code });
+        cmd.on('end', function () {
+            self.env['?'] = exitCode;
+            
+            var op = cmd.op;
+            if (op === '&&' && exitCode !== 0) shiftCommand();
+            if (op === '||' && exitCode === 0) shiftCommand();
+            run();
+        });
+    })();
+    
+    function shiftCommand () {
+        var c = commands.shift();
         var cmd = c.command;
+        
         if (typeof cmd === 'object' && cmd.env) {
             cmd = self.env[cmd.env];
         }
@@ -111,60 +130,32 @@ Bash.prototype.exec = function (line) {
             }
             else return arg;
         }).filter(Boolean);
-        var op = c.op;
         
-        if (op === '&&' && code !== 0) {
-            return run(1, out);
-        }
-        if (op === '||' && code === 0) {
-            return run(1, out);
-        }
-        
-        var res, input;
         if (builtins[cmd] && self.custom.indexOf(cmd) < 0) {
-            res = builtins[cmd].call(self, args);
-        }
-        else {
-            res = self.emit('command', cmd, args, {
-                env: self.env,
-                cwd: self.env.PWD
-            });
+            return builtins[cmd].call(self, args);
         }
         
-        if (res && (res.stdout || res.stderr)) {
-            if (res.stdin) input = res.stdin;
-            if (res.stdout) res.stdout.pipe(out, { end: false });
-            if (res.stderr) res.stderr.pipe(out, { end: false });
-            res.on('close', function (code) {
-                if (next) out.queue(null);
-                run(code, out);
-            });
+        var p = self.emit('command', cmd, args, {
+            env: self.env,
+            cwd: self.env.PWD
+        });
+        if (p && p.stdin && p.stdout) {
+            var d = duplexer(p.stdin, p.stdout);
+            p.on('exit', function (code) { d.emit('exit', code) });
+            return d;
         }
-        else if (res) {
-            input = res;
-            res.on('data', function () {});
-            var exit = 0;
-            res.on('error', function () { exit = 1 });
-            res.on('end', function () {
-                if (next) out.queue(null);
-                nextTick(function () { run(exit, out) });
-            });
-            res.on('exit', function (ecode) { exit = ecode });
-            res.pipe(out, { end: false });
+        if (!p) {
+            p = resumer();
+            p.queue('No command "' + cmd + '" found\n');
         }
-        else {
-            input = through();
-            out.queue('No command "' + cmd + '" found\n');
-            run(1, out);
-        }
-        return input;
-    })(0, output);
+        return p;
+    }
     
     return output;
 };
 
 var builtins = Bash.builtins = {};
-builtins.exec = Bash.prototype.exec;
+builtins.eval = Bash.prototype.eval;
 builtins.echo = function (args) {
     var tr = resumer();
     
