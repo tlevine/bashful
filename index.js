@@ -68,6 +68,7 @@ Bash.prototype.eval = function (line) {
     }
     var output = resumer();
     
+    if (Array.isArray(line)) line = line.join(' ');
     var parts = shellQuote.parse(line, function (key) {
         return { env: key };
     });
