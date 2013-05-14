@@ -46,22 +46,40 @@ $ wc -c < outfile.txt
 var bash = require('bashful')
 ```
 
-## bash.createStream()
+## var sh = bash(opts)
+
+Create a new bashful shell `sh` from `opts`:
+
+* `opts.env` - environment variables to use
+* `opts.write(file)` - return a writable stream for `file`
+* `opts.read(file)` - return a readable stream for `file`
+* `opts.spawn(cmd, args, opts)` - return a process object or a stream
+* `opts.custom` - array of builtin keywords to delegate to `opts.spawn()`
+
+## sh.createStream()
 
 Create a duplex stream for the interpreter.
+Write commands, read command output.
+
+## sh.eval(expr)
+
+Return a duplex stream for a single command expression `expr`.
+`expr` can have all the fanciness of pipes and control characters but won't
+split commands on newlines like `sh.createStream()` will.
 
 # events
 
-## bash.on('command', function cb (cmd, args, opts) {})
+## bash.on('spawn', function (cmd, args, opts) {})
 
-When the stream parses a non-builtin command, this event fires with the command
-`cmd`, its arguments `args` and the `opts.env` and `opts.cwd` of the current
-bash instance that can be passed directly into node core's
-`child_process.spawn()`.
+Just before a command is executed, this event fires.
 
-If the `cb` listener wants to provide an implementation of the command `cmd`, it
-should return a duplex stream or an object with `"stdin"`, `"stdout"`, and
-optionally `"stderr"` streams.
+## bash.on('read', function (file) {})
+
+Just before a file is read, this event fires.
+
+## bash.on('write', function (file) {})
+
+Just before a file is written to, this event fires.
 
 # status
 
@@ -70,7 +88,7 @@ functions you can list by typing `help` in a real bash shell.
 
 ## implemented
 
-* `&&`, `;`, `||`, `|`
+* `&&`, `;`, `||`, `|`, `<`, `>`
 * `$?`
 * `echo [-neE] [arg ...]`
 * `eval [arg ...]`
