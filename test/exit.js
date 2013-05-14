@@ -12,7 +12,7 @@ test('true $?', function (t) {
     var env = {};
     var sh = bash({
         env: env,
-        command: run,
+        spawn: run,
         custom: [ 'true', 'false' ]
     });
     
@@ -29,7 +29,7 @@ test('false $?', function (t) {
     var env = {};
     var sh = bash({
         env: env,
-        command: run,
+        spawn: run,
         custom: [ 'true', 'false' ]
     });
     
@@ -46,7 +46,7 @@ test('true; echo $?', function (t) {
     var env = {};
     var sh = bash({
         env: env,
-        command: run,
+        spawn: run,
         custom: [ 'true', 'false' ]
     });
     
@@ -63,7 +63,7 @@ test('false; echo $?', function (t) {
     var env = {};
     var sh = bash({
         env: env,
-        command: run,
+        spawn: run,
         custom: [ 'true', 'false' ]
     });
     

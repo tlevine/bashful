@@ -12,7 +12,7 @@ test('true and', function (t) {
     var sh = bash({
         env: { XYZ: 'abcdefg' },
         custom: [ 'true', 'false' ],
-        command: run
+        spawn: run
     });
     
     var s = sh.createStream();
@@ -32,7 +32,7 @@ test('false and', function (t) {
     var sh = bash({
         env: { XYZ: 'abcdefg' },
         custom: [ 'true', 'false' ],
-        command: run
+        spawn: run
     });
     
     var s = sh.createStream();
@@ -51,7 +51,7 @@ test('false or', function (t) {
     var sh = bash({
         env: { XYZ: 'abcdefg' },
         custom: [ 'true', 'false' ],
-        command: run
+        spawn: run
     });
     
     var s = sh.createStream();
@@ -71,7 +71,7 @@ test('true or', function (t) {
     var sh = bash({
         env: { XYZ: 'abcdefg' },
         custom: [ 'true', 'false' ],
-        command: run
+        spawn: run
     });
     
     var s = sh.createStream();
@@ -90,7 +90,7 @@ test('false and true or', function (t) {
     var sh = bash({
         env: { XYZ: 'abcdefg' },
         custom: [ 'true', 'false' ],
-        command: run
+        spawn: run
     });
     
     var s = sh.createStream();
@@ -110,7 +110,7 @@ test('false or true and', function (t) {
     var sh = bash({
         env: { XYZ: 'abcdefg' },
         custom: [ 'true', 'false' ],
-        command: run
+        spawn: run
     });
     
     var s = sh.createStream();
@@ -131,7 +131,7 @@ test('false or false and', function (t) {
     var sh = bash({
         env: { XYZ: 'abcdefg' },
         custom: [ 'true', 'false' ],
-        command: run
+        spawn: run
     });
     
     var s = sh.createStream();

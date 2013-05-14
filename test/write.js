@@ -14,9 +14,10 @@ mkdirp.sync(path.dirname(tempfile));
 test('echo > file', function (t) {
     t.plan(2);
     
-    var sh = bash();
-    sh.on('command', spawn);
-    sh.on('write', fs.createWriteStream);
+    var sh = bash({
+        spawn: spawn,
+        write: fs.createWriteStream
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -37,9 +38,10 @@ test('echo > file', function (t) {
 test('echo | wc -c > file', function (t) {
     t.plan(1);
     
-    var sh = bash();
-    sh.on('command', spawn);
-    sh.on('write', fs.createWriteStream);
+    var sh = bash({
+        spawn: spawn,
+        write: fs.createWriteStream
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -55,9 +57,10 @@ test('echo | wc -c > file', function (t) {
 test('pwd; echo | wc -c > file', function (t) {
     t.plan(2);
     
-    var sh = bash();
-    sh.on('command', spawn);
-    sh.on('write', fs.createWriteStream);
+    var sh = bash({
+        spawn: spawn,
+        write: fs.createWriteStream
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -79,9 +82,10 @@ test('pwd; echo | wc -c > file', function (t) {
 test('echo | wc -c > file; pwd', function (t) {
     t.plan(2);
     
-    var sh = bash();
-    sh.on('command', spawn);
-    sh.on('write', fs.createWriteStream);
+    var sh = bash({
+        spawn: spawn,
+        write: fs.createWriteStream
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -103,9 +107,10 @@ test('echo | wc -c > file; pwd', function (t) {
 test('true > file && echo PASS', function (t) {
     t.plan(2);
     
-    var sh = bash();
-    sh.on('command', spawn);
-    sh.on('write', fs.createWriteStream);
+    var sh = bash({
+        spawn: spawn,
+        write: fs.createWriteStream
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -119,9 +124,10 @@ test('true > file && echo PASS', function (t) {
 test('false > file && echo PASS', function (t) {
     t.plan(2);
     
-    var sh = bash();
-    sh.on('command', spawn);
-    sh.on('write', fs.createWriteStream);
+    var sh = bash({
+        spawn: spawn,
+        write: fs.createWriteStream
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -135,9 +141,10 @@ test('false > file && echo PASS', function (t) {
 test('true > file || echo PASS', function (t) {
     t.plan(2);
     
-    var sh = bash();
-    sh.on('command', spawn);
-    sh.on('write', fs.createWriteStream);
+    var sh = bash({
+        spawn: spawn,
+        write: fs.createWriteStream
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -151,9 +158,10 @@ test('true > file || echo PASS', function (t) {
 test('false > file || echo PASS', function (t) {
     t.plan(2);
     
-    var sh = bash();
-    sh.on('command', spawn);
-    sh.on('write', fs.createWriteStream);
+    var sh = bash({
+        spawn: spawn,
+        write: fs.createWriteStream
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {

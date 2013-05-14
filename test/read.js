@@ -14,10 +14,10 @@ mkdirp.sync(path.dirname(tempfile));
 test('wc -c < file', function (t) {
     t.plan(1);
     
-    var sh = bash();
-    sh.on('command', spawn);
-    sh.on('read', fs.createReadStream);
-    
+    var sh = bash({
+        spawn: spawn,
+        read: fs.createReadStream
+    });
     fs.writeFileSync(tempfile, 'beep boop\n');
     
     var s = sh.createStream();
