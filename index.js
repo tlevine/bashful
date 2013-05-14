@@ -34,9 +34,9 @@ Bash.prototype._write = function (file) {
     if (this._writer) return this._writer(file);
 };
 
-Bash.prototype._command = function (file) {
-    this.emit('command', file);
-    if (this._commander) return this._commander(file);
+Bash.prototype._command = function (cmd, args, opts) {
+    this.emit('command', cmd, args, opts);
+    if (this._commander) return this._commander(cmd, args, opts);
 };
 
 Bash.prototype.override = function (cmd) {

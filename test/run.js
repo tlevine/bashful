@@ -6,8 +6,10 @@ var concat = require('concat-stream');
 test('run', function (t) {
     t.plan(1);
     
-    var sh = bash({ XYZ: 'abcdefg' });
-    sh.on('command', run);
+    var sh = bash({
+        env: { XYZ: 'abcdefg' },
+        command: run
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
