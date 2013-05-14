@@ -2,7 +2,6 @@ var split = require('split');
 var through = require('through');
 var duplexer = require('duplexer');
 var shellQuote = require('shell-quote');
-var shellExpand = require('./lib/expand');
 
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('inherits');
@@ -113,7 +112,7 @@ Bash.prototype.eval = function (line) {
                 ;
                 var ws = self.emit('write', file);
                 ws.on('error', function (err) {
-                    output.queue(file + ': ' + err + '\n');
+                    output.queue(file + ': ' + (err.message || err) + '\n');
                     exitCode = err && err.code || 1;
                 });
                 if (!ws) {
