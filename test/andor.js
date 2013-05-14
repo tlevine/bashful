@@ -9,9 +9,11 @@ var nextTick = typeof setImmediate !== 'undefined'
 test('true and', function (t) {
     t.plan(1);
     
-    var sh = bash({ XYZ: 'abcdefg' });
-    sh.override([ 'true', 'false' ]);
-    sh.on('command', run);
+    var sh = bash({
+        env: { XYZ: 'abcdefg' },
+        custom: [ 'true', 'false' ],
+        command: run
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -27,9 +29,11 @@ test('true and', function (t) {
 test('false and', function (t) {
     t.plan(1);
     
-    var sh = bash({ XYZ: 'abcdefg' });
-    sh.override([ 'true', 'false' ]);
-    sh.on('command', run);
+    var sh = bash({
+        env: { XYZ: 'abcdefg' },
+        custom: [ 'true', 'false' ],
+        command: run
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -44,9 +48,11 @@ test('false and', function (t) {
 test('false or', function (t) {
     t.plan(1);
     
-    var sh = bash({ XYZ: 'abcdefg' });
-    sh.override([ 'true', 'false' ]);
-    sh.on('command', run);
+    var sh = bash({
+        env: { XYZ: 'abcdefg' },
+        custom: [ 'true', 'false' ],
+        command: run
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -62,9 +68,11 @@ test('false or', function (t) {
 test('true or', function (t) {
     t.plan(1);
     
-    var sh = bash({ XYZ: 'abcdefg' });
-    sh.override([ 'true', 'false' ]);
-    sh.on('command', run);
+    var sh = bash({
+        env: { XYZ: 'abcdefg' },
+        custom: [ 'true', 'false' ],
+        command: run
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -79,9 +87,11 @@ test('true or', function (t) {
 test('false and true or', function (t) {
     t.plan(1);
     
-    var sh = bash({ XYZ: 'abcdefg' });
-    sh.override([ 'true', 'false' ]);
-    sh.on('command', run);
+    var sh = bash({
+        env: { XYZ: 'abcdefg' },
+        custom: [ 'true', 'false' ],
+        command: run
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -97,9 +107,11 @@ test('false and true or', function (t) {
 test('false or true and', function (t) {
     t.plan(1);
     
-    var sh = bash({ XYZ: 'abcdefg' });
-    sh.override([ 'true', 'false' ]);
-    sh.on('command', run);
+    var sh = bash({
+        env: { XYZ: 'abcdefg' },
+        custom: [ 'true', 'false' ],
+        command: run
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
@@ -116,9 +128,11 @@ test('false or true and', function (t) {
 test('false or false and', function (t) {
     t.plan(1);
     
-    var sh = bash({ XYZ: 'abcdefg' });
-    sh.override([ 'true', 'false' ]);
-    sh.on('command', run);
+    var sh = bash({
+        env: { XYZ: 'abcdefg' },
+        custom: [ 'true', 'false' ],
+        command: run
+    });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
