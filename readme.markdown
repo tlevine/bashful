@@ -61,9 +61,10 @@ functions you can list by typing `help` in a real bash shell.
 
 * `&&`, `;`, `||`, `|`
 * `$?`
-* filename [arguments]
 * `echo [-neE] [arg ...]`
+* `eval [arg ...]`
 * `false`
+* `filename [arguments]`
 * `true`
 
 ## not yet implemented
@@ -92,7 +93,6 @@ functions you can list by typing `help` in a real bash shell.
 * `dirs [-clpv] [+N] [-N]`
 * `disown [-h] [-ar] [jobspec ...]`
 * `enable [-a] [-dnps] [-f filename] [na>`
-* `eval [arg ...]`
 * `exec [-cl] [-a name] [command [argume>`
 * `exit [n]`
 * `export [-fn] [name[=value] ...] or ex>`
