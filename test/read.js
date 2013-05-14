@@ -27,3 +27,20 @@ test('wc -c < file', function (t) {
     s.write('wc -c < ' + tempfile + '\n');
     s.end();
 });
+
+test('cat < file | wc -c', function (t) {
+    t.plan(1);
+    
+    var sh = bash({
+        spawn: spawn,
+        read: fs.createReadStream
+    });
+    fs.writeFileSync(tempfile, 'beep boop\n');
+    
+    var s = sh.createStream();
+    s.pipe(concat(function (err, src) {
+        t.equal(src, '$ 10\n$ ');
+    }));
+    s.write('cat < ' + tempfile + '| wc -c\n');
+    s.end();
+});
