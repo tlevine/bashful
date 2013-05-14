@@ -98,15 +98,37 @@ Bash.prototype.eval = function (line) {
             });
         }
         var cmd = shiftCommand();
-        while (commands[0] && commands[0].op === '|') {
-            commands.shift();
-            cmd = cmd.pipe(shiftCommand());
+        var redirected = false;
+        
+        while (commands[0] && /^[|<>]$/.test(commands[0].op)) {
+            var op = commands.shift().op;
+            if (op === '|') {
+                cmd = cmd.pipe(shiftCommand());
+            }
+            else if (op === '>') {
+                var c = commands.shift();
+                var file = typeof c === 'object' && c.env
+                    ? self.env[c.env]
+                    : c.command
+                ;
+                var ws = self.emit('write', file);
+                ws.on('error', function (err) {
+                    output.queue(file + ': ' + err + '\n');
+                    exitCode = err && err.code || 1;
+                });
+                if (!ws) {
+                    output.queue(file + ': No such file or directory\n');
+                    exitCode = 1;
+                }
+                else cmd.pipe(ws);
+                redirected = true;
+            }
         }
         
         var exitCode = 0;
-        cmd.pipe(output, { end: false });
+        if (!redirected) cmd.pipe(output, { end: false });
         
-        cmd.on('exit', function (code) { exitCode = code });
+        cmd.on('exit', function (code) { exitCode = exitCode || code });
         cmd.on('end', function () {
             for (var next = commands[0]; next && next.op; next = commands[0]) {
                 commands.shift();

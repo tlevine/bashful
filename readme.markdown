@@ -10,13 +10,19 @@ so you can use your own IO backend.
 ``` js
 var bash = require('../')(process.env);
 bash.on('command', require('child_process').spawn);
+bash.on('write', require('fs').createWriteStream);
 
 var s = bash.createStream();
 process.stdin.pipe(s).pipe(process.stdout);
 ```
 
+Just run this shell program like any ordinary program:
+
 ```
 $ node example/sh.js 
+```
+
+```
 $ echo hello
 hello
 $ echo $PWD
@@ -27,6 +33,9 @@ $ echo beep boop | wc -c
 10
 $ false || true && echo bleep
 bleep
+$ echo ONE TWO THREE > outfile.txt
+$ cat outfile.txt
+ONE TWO THREE
 ```
 
 # methods
