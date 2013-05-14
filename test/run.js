@@ -8,7 +8,7 @@ test('run', function (t) {
     
     var sh = bash({
         env: { XYZ: 'abcdefg' },
-        command: run
+        spawn: run
     });
     
     var s = sh.createStream();

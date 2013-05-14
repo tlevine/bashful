@@ -21,7 +21,7 @@ function Bash (opts) {
     
     this._reader = opts.read;
     this._writer = opts.write;
-    this._commander = opts.command;
+    this._spawner = opts.spawn;
 }
 
 Bash.prototype._read = function (file) {
@@ -34,9 +34,9 @@ Bash.prototype._write = function (file) {
     if (this._writer) return this._writer(file);
 };
 
-Bash.prototype._command = function (cmd, args, opts) {
-    this.emit('command', cmd, args, opts);
-    if (this._commander) return this._commander(cmd, args, opts);
+Bash.prototype._spawn = function (cmd, args, opts) {
+    this.emit('spawn', cmd, args, opts);
+    if (this._spawner) return this._spawner(cmd, args, opts);
 };
 
 Bash.prototype.createStream = function () {
@@ -193,7 +193,7 @@ Bash.prototype.eval = function (line) {
             return builtins[cmd].call(self, args);
         }
         
-        var p = self._command(cmd, args, {
+        var p = self._spawn(cmd, args, {
             env: self.env,
             cwd: self.env.PWD
         });
