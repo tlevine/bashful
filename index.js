@@ -10,15 +10,34 @@ var nextTick = typeof setImmediate === 'function'
 ;
 
 module.exports = Bash;
+inherits(Bash, EventEmitter);
 
-function Bash (env) {
-    if (!(this instanceof Bash)) return new Bash(env);
-    this.env = env || {};
+function Bash (opts) {
+    if (!(this instanceof Bash)) return new Bash(opts);
+    if (!opts) opts = {};
+    this.env = opts.env || {};
     if (this.env.PS1 === undefined) this.env.PS1 = '$ ';
     this.custom = [];
+    
+    this._reader = opts.read;
+    this._writer = opts.write;
+    this._commander = opts.command;
 }
 
-inherits(Bash, EventEmitter);
+Bash.prototype._read = function (file) {
+    this.emit('read', file);
+    if (this._reader) return this._reader(file);
+};
+
+Bash.prototype._write = function (file) {
+    this.emit('write', file);
+    if (this._writer) return this._writer(file);
+};
+
+Bash.prototype._command = function (file) {
+    this.emit('command', file);
+    if (this._commander) return this._commander(file);
+};
 
 Bash.prototype.override = function (cmd) {
     var self = this;
@@ -110,7 +129,7 @@ Bash.prototype.eval = function (line) {
                     ? self.env[c.env]
                     : c.command
                 ;
-                var ws = self.emit('write', file);
+                var ws = self._write(file);
                 ws.on('error', function (err) {
                     output.queue(file + ': ' + (err.message || err) + '\n');
                     exitCode = err && err.code || 1;
@@ -128,7 +147,7 @@ Bash.prototype.eval = function (line) {
                     ? self.env[c.env]
                     : c.command
                 ;
-                var rs = self.emit('read', file);
+                var rs = self._read(file);
                 rs.on('error', function (err) {
                     output.queue(file + ': ' + (err.message || err) + '\n');
                     exitCode = err && err.code || 1;
@@ -182,7 +201,7 @@ Bash.prototype.eval = function (line) {
             return builtins[cmd].call(self, args);
         }
         
-        var p = self.emit('command', cmd, args, {
+        var p = self._command(cmd, args, {
             env: self.env,
             cwd: self.env.PWD
         });
