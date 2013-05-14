@@ -23,6 +23,10 @@ $ echo $PWD
 /home/substack/projects/bashful
 $ beep boop
 No command "beep" found
+$ echo beep boop | wc -c
+10
+$ false || true && echo bleep
+bleep
 ```
 
 # methods
