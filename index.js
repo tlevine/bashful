@@ -87,8 +87,9 @@ Bash.prototype.eval = function (line) {
         }
     }
     
-    self.env['?'] = 0;
-    (function run () {
+    (function run (prevCode) {
+        self.env['?'] = prevCode;
+        
         if (commands.length === 0) {
             return nextTick(function () {
                 output.emit('exit', self.env['?']);
@@ -96,8 +97,8 @@ Bash.prototype.eval = function (line) {
             });
         }
         var cmd = shiftCommand();
-        
         while (commands[0] && commands[0].op === '|') {
+            commands.shift();
             cmd = cmd.pipe(shiftCommand());
         }
         
@@ -106,14 +107,21 @@ Bash.prototype.eval = function (line) {
         
         cmd.on('exit', function (code) { exitCode = code });
         cmd.on('end', function () {
-            self.env['?'] = exitCode;
-            
-            var op = cmd.op;
-            if (op === '&&' && exitCode !== 0) shiftCommand();
-            if (op === '||' && exitCode === 0) shiftCommand();
-            run();
+            for (var next = commands[0]; next && next.op; next = commands[0]) {
+                commands.shift();
+                if (next && next.op === '&&' && exitCode !== 0) {
+                    commands.shift();
+                    exitCode = 1;
+                }
+                else if (next && next.op === '||' && exitCode === 0) {
+                    commands.shift();
+                    exitCode = 1;
+                }
+            }
+            run(exitCode);
         });
-    })();
+        return cmd;
+    })(0);
     
     function shiftCommand () {
         var c = commands.shift();
