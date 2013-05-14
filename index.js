@@ -122,6 +122,23 @@ Bash.prototype.eval = function (line) {
                 else cmd.pipe(ws);
                 redirected = true;
             }
+            else if (op === '<') {
+                var c = commands.shift();
+                var file = typeof c === 'object' && c.env
+                    ? self.env[c.env]
+                    : c.command
+                ;
+                var rs = self.emit('read', file);
+                rs.on('error', function (err) {
+                    output.queue(file + ': ' + (err.message || err) + '\n');
+                    exitCode = err && err.code || 1;
+                });
+                if (!rs) {
+                    output.queue(file + ': No such file or directory\n');
+                    exitCode = 1;
+                }
+                else rs.pipe(cmd);
+            }
         }
         
         var exitCode = 0;
