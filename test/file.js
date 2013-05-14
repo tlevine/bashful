@@ -51,3 +51,27 @@ test('echo | wc -c > file', function (t) {
     s.write('echo beep boop | wc -c > ' + tempfile + '\n');
     s.end();
 });
+
+test('pwd; echo | wc -c > file', function (t) {
+    t.plan(2);
+    
+    var sh = bash();
+    sh.on('command', spawn);
+    sh.on('write', fs.createWriteStream);
+    
+    var s = sh.createStream();
+    s.pipe(concat(function (err, src) {
+        t.equal(
+            fs.readFileSync(tempfile, 'utf8'),
+            '10\n'
+        );
+        t.equal(src, [
+            '$ ' + process.cwd(),
+            '$ 10',
+            '$ '
+        ].join('\n'));
+    }));
+    s.write('pwd; echo beep boop | wc -c > ' + tempfile + '\n');
+    s.write('cat ' + tempfile + '\n');
+    s.end();
+});
