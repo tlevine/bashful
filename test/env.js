@@ -23,9 +23,11 @@ test('set env vars', function (t) {
 
 function run (cmd, args, opts) {
     if (cmd === 'printx') {
-        return through(null, function () {
-            this.queue(args[0] + '\n');
-            this.queue(null);
-        });
+        var tr = through();
+        tr.pause();
+        tr.queue(args[0] + '\n');
+        tr.queue(null);
+        process.nextTick(function () { tr.resume() });
+        return tr;
     }
 }
