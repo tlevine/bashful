@@ -212,7 +212,7 @@ Bash.prototype.eval = function (line) {
         }
         
         var p = self._spawn(cmd, args, {
-            env: self.env,
+            env: localEnv || self.env,
             cwd: self.env.PWD
         });
         if (p && p.stdin && p.stdout) {
