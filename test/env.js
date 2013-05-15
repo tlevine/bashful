@@ -6,7 +6,7 @@ var concat = require('concat-stream');
 test('set env vars', function (t) {
     t.plan(1);
     
-    var sh = bash({ spawn: run });
+    var sh = bash({ spawn: run, env: { X: 3 } });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
