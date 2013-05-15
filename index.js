@@ -176,10 +176,6 @@ Bash.prototype.eval = function (line) {
     function shiftCommand () {
         var c = commands.shift();
         var cmd = c.command;
-        
-        if (typeof cmd === 'object' && cmd.env) {
-            cmd = self.env[cmd.env];
-        }
         var args = c.args.map(function (arg) {
             if (typeof arg === 'object' && arg.env) {
                 var r = self.env[arg.env];
@@ -188,6 +184,28 @@ Bash.prototype.eval = function (line) {
             }
             else return arg;
         }).filter(Boolean);
+        
+        var localEnv = null;
+        while (typeof cmd === 'string' && /^\w+=/.test(cmd)) {
+            var m = /^(\w+)=(.*)/.exec(cmd);
+            var key = m[1], value = m[2];
+            if (!localEnv) localEnv = copy(self.env);
+            localEnv[key] = value;
+            
+            cmd = args.shift();
+            if (cmd === undefined) {
+                Object.keys(localEnv).forEach(function (key) {
+                    self.env[key] = localEnv[key];
+                });
+                var tr = resumer();
+                tr.queue(null);
+                return tr;
+            }
+        }
+        
+        if (typeof cmd === 'object' && cmd.env) {
+            cmd = self.env[cmd.env];
+        }
         
         if (builtins[cmd] && self.custom.indexOf(cmd) < 0) {
             return builtins[cmd].call(self, args);
@@ -284,4 +302,12 @@ function resumer () {
     });
     
     return tr;
+}
+
+function copy (obj) {
+    var res = {};
+    Object.keys(obj).forEach(function (key) {
+        res[key] = obj[key];
+    });
+    return res;
 }
