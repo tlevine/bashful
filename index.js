@@ -1,5 +1,6 @@
 var split = require('split');
 var through = require('through');
+var resumer = require('resumer');
 var duplexer = require('duplexer');
 var shellQuote = require('shell-quote');
 var decodePrompt = require('decode-prompt');
@@ -303,30 +304,6 @@ builtins['false'] = function (args) {
     });
     return tr;
 };
-
-function resumer () {
-    var tr = through();
-    tr.pause();
-    var resume = tr.resume;
-    var pause = tr.pause;
-    var paused = false;
-    
-    tr.pause = function () {
-        paused = true;
-        return pause.apply(this, arguments);
-    };
-    
-    tr.resume = function () {
-        paused = false;
-        return resume.apply(this, arguments);
-    };
-    
-    nextTick(function () {
-        if (!paused) tr.resume();
-    });
-    
-    return tr;
-}
 
 function copy (obj) {
     var res = {};
