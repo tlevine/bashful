@@ -284,26 +284,23 @@ builtins.echo = function (args) {
 };
 
 builtins['true'] = function (args) {
-    var tr = through();
-    tr.pause();
-    nextTick(function () {
-        tr.emit('exit', 0);
-        tr.queue(null);
-        tr.resume();
-    });
-    return tr;
+    return resumerExit(0);
 };
 
 builtins['false'] = function (args) {
+    return resumerExit(1);
+};
+
+function resumerExit (code) {
     var tr = through();
     tr.pause();
     nextTick(function () {
-        tr.emit('exit', 1);
+        tr.emit('exit', code);
         tr.queue(null);
         tr.resume();
     });
     return tr;
-};
+}
 
 function copy (obj) {
     var res = {};
