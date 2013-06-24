@@ -8,7 +8,11 @@ var spawn = require('child_process').spawn;
 
 var path = require('path');
 var mkdirp = require('mkdirp');
-var tempfile = path.join(require('os').tmpDir(), 'bashful-test', Math.random());
+var tempfile = path.join(
+    require('os').tmpDir(),
+    'bashful-test',
+    Math.floor(Math.pow(16,8)*Math.random()).toString(16)
+);
 mkdirp.sync(path.dirname(tempfile));
 
 test('echo > file', function (t) {
