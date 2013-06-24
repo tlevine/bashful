@@ -10,18 +10,14 @@ test('true and', function (t) {
     t.plan(1);
     
     var sh = bash({
-        env: { XYZ: 'abcdefg' },
+        env: { XYZ: 'abcdefg', PS1: '$ ' },
         custom: [ 'true', 'false' ],
         spawn: run
     });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(src, [
-            '$ TRUE',
-            'abcdefg',
-            '$ '
-        ].join('\n'));
+        t.equal(src, '$ TRUE\nabcdefg\n');
     }));
     s.end('true && echo $XYZ\n');
 });
@@ -30,17 +26,14 @@ test('false and', function (t) {
     t.plan(1);
     
     var sh = bash({
-        env: { XYZ: 'abcdefg' },
+        env: { XYZ: 'abcdefg', PS1: '$ ' },
         custom: [ 'true', 'false' ],
         spawn: run
     });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(src, [
-            '$ FALSE',
-            '$ '
-        ].join('\n'));
+        t.equal(src, '$ FALSE\n');
     }));
     s.end('false && echo $XYZ\n');
 });
@@ -49,18 +42,14 @@ test('false or', function (t) {
     t.plan(1);
     
     var sh = bash({
-        env: { XYZ: 'abcdefg' },
+        env: { XYZ: 'abcdefg', PS1: '$ ' },
         custom: [ 'true', 'false' ],
         spawn: run
     });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(src, [
-            '$ FALSE',
-            'abcdefg',
-            '$ '
-        ].join('\n'));
+        t.equal(src, '$ FALSE\nabcdefg\n');
     }));
     s.end('false || echo $XYZ\n');
 });
@@ -69,17 +58,14 @@ test('true or', function (t) {
     t.plan(1);
     
     var sh = bash({
-        env: { XYZ: 'abcdefg' },
+        env: { XYZ: 'abcdefg', PS1: '$ ' },
         custom: [ 'true', 'false' ],
         spawn: run
     });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(src, [
-            '$ TRUE',
-            '$ '
-        ].join('\n'));
+        t.equal(src, '$ TRUE\n');
     }));
     s.end('true || echo $XYZ\n');
 });
@@ -88,18 +74,14 @@ test('false and true or', function (t) {
     t.plan(1);
     
     var sh = bash({
-        env: { XYZ: 'abcdefg' },
+        env: { XYZ: 'abcdefg', PS1: '$ ' },
         custom: [ 'true', 'false' ],
         spawn: run
     });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(src, [
-            '$ FALSE',
-            'abcdefg',
-            '$ '
-        ].join('\n'));
+        t.equal(src, '$ FALSE\nabcdefg\n');
     }));
     s.end('false && true || echo $XYZ\n');
 });
@@ -108,19 +90,14 @@ test('false or true and', function (t) {
     t.plan(1);
     
     var sh = bash({
-        env: { XYZ: 'abcdefg' },
+        env: { XYZ: 'abcdefg', PS1: '$ ' },
         custom: [ 'true', 'false' ],
         spawn: run
     });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(src, [
-            '$ FALSE',
-            'TRUE',
-            'abcdefg',
-            '$ '
-        ].join('\n'));
+        t.equal(src, '$ FALSE\nTRUE\nabcdefg\n');
     }));
     s.end('false || true && echo $XYZ\n');
 });
@@ -129,18 +106,14 @@ test('false or false and', function (t) {
     t.plan(1);
     
     var sh = bash({
-        env: { XYZ: 'abcdefg' },
+        env: { XYZ: 'abcdefg', PS1: '$ ' },
         custom: [ 'true', 'false' ],
         spawn: run
     });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(src, [
-            '$ FALSE',
-            'FALSE',
-            '$ '
-        ].join('\n'));
+        t.equal(src, '$ FALSE\nFALSE\n');
     }));
     s.end('false || false && echo $XYZ\n');
 });

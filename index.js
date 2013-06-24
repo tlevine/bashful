@@ -63,14 +63,20 @@ Bash.prototype.createStream = function () {
     function write (line) {
         var p = self.eval(line);
         sp.pause();
-        p.on('data', function () {});
-        p.on('end', function () {
-            output.queue(self.getPrompt());
+        p.pause();
+        p.pipe(through(null, function () {
             sp.resume();
-        });
+            nextTick(function () {
+                output.queue(self.getPrompt());
+            });
+        }));
         p.pipe(output, { end: false });
+        p.resume();
     }
-    function end () { output.queue(null) }
+    
+    function end () {
+        output.queue(null);
+    }
 };
 
 Bash.prototype.emit = function (name) {
