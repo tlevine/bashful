@@ -9,7 +9,7 @@ var nextTick = typeof setImmediate !== 'undefined'
 test('true $?', function (t) {
     t.plan(1);
     
-    var env = {};
+    var env = { PS1: '$ ' };
     var sh = bash({
         env: env,
         spawn: run,
@@ -26,7 +26,7 @@ test('true $?', function (t) {
 test('false $?', function (t) {
     t.plan(1);
     
-    var env = {};
+    var env = { PS1: '$ ' };
     var sh = bash({
         env: env,
         spawn: run,
@@ -43,7 +43,7 @@ test('false $?', function (t) {
 test('true; echo $?', function (t) {
     t.plan(1);
     
-    var env = {};
+    var env = { PS1: '$ ' };
     var sh = bash({
         env: env,
         spawn: run,
@@ -52,7 +52,7 @@ test('true; echo $?', function (t) {
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(src, '$ 0\n$ ');
+        t.equal(src, '$ 0\n');
     }));
     s.end('true; echo $?\n');
 });
@@ -60,7 +60,7 @@ test('true; echo $?', function (t) {
 test('false; echo $?', function (t) {
     t.plan(1);
     
-    var env = {};
+    var env = { PS1: '$ ' };
     var sh = bash({
         env: env,
         spawn: run,
@@ -69,7 +69,7 @@ test('false; echo $?', function (t) {
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(src, '$ 1\n$ ');
+        t.equal(src, '$ 1\n');
     }));
     s.end('false; echo $?\n');
 });
