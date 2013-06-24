@@ -7,7 +7,7 @@ test('run', function (t) {
     t.plan(1);
     
     var sh = bash({
-        env: { XYZ: 'abcdefg' },
+        env: { XYZ: 'abcdefg', PS1: '$ ' },
         spawn: run
     });
     
@@ -17,7 +17,7 @@ test('run', function (t) {
             '$ /home/test',
             'boop',
             'abcdefg',
-            '$ '
+            ''
         ].join('\n'));
     }));
     s.end('pwd; beep; echo $XYZ\n');

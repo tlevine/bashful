@@ -20,6 +20,7 @@ test('echo > file', function (t) {
     
     var sh = bash({
         spawn: spawn,
+        env: { PS1: '' },
         write: fs.createWriteStream
     });
     
@@ -29,10 +30,7 @@ test('echo > file', function (t) {
             fs.readFileSync(tempfile, 'utf8'),
             'beep boop\n'
         );
-        t.equal(src, [
-            '$ $ beep boop',
-            '$ '
-        ].join('\n'));
+        t.equal(src, 'beep boop\n');
     }));
     s.write('echo beep boop > ' + tempfile + '\n');
     s.write('cat ' + tempfile + '\n');
@@ -44,6 +42,7 @@ test('echo | wc -c > file', function (t) {
     
     var sh = bash({
         spawn: spawn,
+        env: { PS1: '$ ' },
         write: fs.createWriteStream
     });
     
@@ -63,6 +62,7 @@ test('pwd; echo | wc -c > file', function (t) {
     
     var sh = bash({
         spawn: spawn,
+        env: { PS1: '' },
         write: fs.createWriteStream
     });
     
@@ -72,11 +72,7 @@ test('pwd; echo | wc -c > file', function (t) {
             fs.readFileSync(tempfile, 'utf8'),
             '10\n'
         );
-        t.equal(src, [
-            '$ ' + process.cwd(),
-            '$ 10',
-            '$ '
-        ].join('\n'));
+        t.equal(src, process.cwd() + '\n10\n');
     }));
     s.write('pwd; echo beep boop | wc -c > ' + tempfile + '\n');
     s.write('cat ' + tempfile + '\n');
@@ -88,6 +84,7 @@ test('echo | wc -c > file; pwd', function (t) {
     
     var sh = bash({
         spawn: spawn,
+        env: { PS1: '' },
         write: fs.createWriteStream
     });
     
@@ -97,11 +94,7 @@ test('echo | wc -c > file; pwd', function (t) {
             fs.readFileSync(tempfile, 'utf8'),
             '10\n'
         );
-        t.equal(src, [
-            '$ ' + process.cwd(),
-            '$ 10',
-            '$ '
-        ].join('\n'));
+        t.equal(src, process.cwd() + '\n10\n');
     }));
     s.write('echo beep boop | wc -c > ' + tempfile + '; pwd\n');
     s.write('cat ' + tempfile + '\n');
@@ -113,13 +106,14 @@ test('true > file && echo PASS', function (t) {
     
     var sh = bash({
         spawn: spawn,
+        env: { PS1: '$ ' },
         write: fs.createWriteStream
     });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
         t.equal(fs.readFileSync(tempfile, 'utf8'), '');
-        t.equal(src, '$ PASS\n$ ');
+        t.equal(src, '$ PASS\n');
     }));
     s.write('true > ' + tempfile + ' && echo PASS\n');
     s.end();
@@ -130,13 +124,14 @@ test('false > file && echo PASS', function (t) {
     
     var sh = bash({
         spawn: spawn,
+        env: { PS1: '$ ' },
         write: fs.createWriteStream
     });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
         t.equal(fs.readFileSync(tempfile, 'utf8'), '');
-        t.equal(src, '$ $ ');
+        t.equal(src, '$ ');
     }));
     s.write('false > ' + tempfile + ' && echo PASS\n');
     s.end();
@@ -147,13 +142,14 @@ test('true > file || echo PASS', function (t) {
     
     var sh = bash({
         spawn: spawn,
+        env: { PS1: '$ ' },
         write: fs.createWriteStream
     });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
         t.equal(fs.readFileSync(tempfile, 'utf8'), '');
-        t.equal(src, '$ $ ');
+        t.equal(src, '$ ');
     }));
     s.write('true > ' + tempfile + ' || echo PASS\n');
     s.end();
@@ -164,13 +160,14 @@ test('false > file || echo PASS', function (t) {
     
     var sh = bash({
         spawn: spawn,
+        env: { PS1: '$ ' },
         write: fs.createWriteStream
     });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
         t.equal(fs.readFileSync(tempfile, 'utf8'), '');
-        t.equal(src, '$ PASS\n$ ');
+        t.equal(src, '$ PASS\n');
     }));
     s.write('false > ' + tempfile + ' || echo PASS\n');
     s.end();
