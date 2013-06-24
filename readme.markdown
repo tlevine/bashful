@@ -93,6 +93,7 @@ functions you can list by typing `help` in a real bash shell.
 
 * `&&`, `;`, `||`, `|`, `<`, `>`
 * `$?`
+* `cd [-L|[-P [-e]]] [dir]`
 * `echo [-neE] [arg ...]`
 * `eval [arg ...]`
 * `false`
@@ -114,7 +115,6 @@ functions you can list by typing `help` in a real bash shell.
 * `builtin [shell-builtin [arg ...]]`
 * `caller [expr]`
 * `case WORD in [PATTERN [| PATTERN]...)>`
-* `cd [-L|[-P [-e]]] [dir]`
 * `command [-pVv] command [arg ...]`
 * `compgen [-abcdefgjksuv] [-o option]  >`
 * `complete [-abcdefgjksuv] [-pr] [-DE] >`
