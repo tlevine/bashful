@@ -15,7 +15,8 @@ var sh = bash({
     env: process.env,
     spawn: require('child_process').spawn,
     write: fs.createWriteStream,
-    read: fs.createReadStream
+    read: fs.createReadStream,
+    exists: fs.exists
 });
 
 var s = sh.createStream();
@@ -53,6 +54,8 @@ Create a new bashful shell `sh` from `opts`:
 * `opts.env` - environment variables to use
 * `opts.write(file)` - return a writable stream for `file`
 * `opts.read(file)` - return a readable stream for `file`
+* `opts.exists(file, cb)` - query whether `file` exists or not as the first
+argument to `cb(ex)`
 * `opts.spawn(cmd, args, opts)` - return a process object or a stream
 * `opts.custom` - array of builtin keywords to delegate to `opts.spawn()`
 
