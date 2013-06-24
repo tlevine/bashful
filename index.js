@@ -187,8 +187,11 @@ Bash.prototype.eval = function (line) {
         
         var localEnv = null;
         while (typeof cmd === 'string' && /^\w+=/.test(cmd)) {
-            var m = /^(\w+)=(.*)/.exec(cmd);
-            var key = m[1], value = m[2];
+            var m = /^(\w+)=(?:"((?:[^"]|\\")*)"|'((?:[^']|\\')*)'|(.*))/
+                .exec(cmd)
+            ;
+            var key = m[1], value = m[2] || m[3] || m[4] || '';
+            
             if (!localEnv) localEnv = copy(self.env);
             localEnv[key] = value;
             
