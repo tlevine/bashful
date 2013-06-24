@@ -2,6 +2,7 @@ var split = require('split');
 var through = require('through');
 var duplexer = require('duplexer');
 var shellQuote = require('shell-quote');
+var decodePrompt = require('decode-prompt');
 
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('inherits');
@@ -16,7 +17,12 @@ function Bash (opts) {
     if (!(this instanceof Bash)) return new Bash(opts);
     if (!opts) opts = {};
     this.env = opts.env || {};
-    if (this.env.PS1 === undefined) this.env.PS1 = '$ ';
+    if (this.env.PS1 === undefined) {
+        this.env.PS1 = opts.isTTY === false
+            ? '\\w \\$ '
+            : '\\w \\$ '
+        ;
+    }
     this.custom = opts.custom || [];
     
     this._reader = opts.read;
@@ -39,12 +45,18 @@ Bash.prototype._spawn = function (cmd, args, opts) {
     if (this._spawner) return this._spawner(cmd, args, opts);
 };
 
+Bash.prototype.getPrompt = function () {
+    return decodePrompt(this.env.PS1, {
+        env: this.env
+    });
+};
+
 Bash.prototype.createStream = function () {
     var self = this;
     var sp = split();
     
     var output = resumer();
-    output.queue(self.env.PS1);
+    output.queue(self.getPrompt());
     
     sp.pipe(through(write, end));
     return duplexer(sp, output);
@@ -53,7 +65,7 @@ Bash.prototype.createStream = function () {
         sp.pause();
         p.on('data', function () {});
         p.on('end', function () {
-            output.queue(self.env.PS1);
+            output.queue(self.getPrompt());
             sp.resume();
         });
         p.pipe(output, { end: false });
