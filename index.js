@@ -54,12 +54,14 @@ Bash.prototype.getPrompt = function () {
 Bash.prototype.createStream = function () {
     var self = this;
     var sp = split();
+    var closed = false;
     
     var output = resumer();
     output.queue(self.getPrompt());
     
     sp.pipe(through(write, end));
     return duplexer(sp, output);
+    
     function write (line) {
         var p = self.eval(line);
         sp.pause();
@@ -67,7 +69,7 @@ Bash.prototype.createStream = function () {
         p.pipe(through(null, function () {
             sp.resume();
             nextTick(function () {
-                output.queue(self.getPrompt());
+                if (!closed) output.queue(self.getPrompt());
             });
         }));
         p.pipe(output, { end: false });
@@ -75,6 +77,7 @@ Bash.prototype.createStream = function () {
     }
     
     function end () {
+        closed = true;
         output.queue(null);
     }
 };

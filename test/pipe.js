@@ -6,14 +6,11 @@ var concat = require('concat-stream');
 test('run', function (t) {
     t.plan(1);
     
-    var sh = bash({ spawn: run });
+    var sh = bash({ spawn: run, env: { 'PS1': '$ ' } });
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(src, [
-            '$ 10',
-            '$ '
-        ].join('\n'));
+        t.equal(src, '$ 10\n');
     }));
     s.write('echo beep boop | wc -c\n');
     s.end();

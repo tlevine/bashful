@@ -7,7 +7,7 @@ test('run', function (t) {
     t.plan(1);
     
     var sh = bash({
-        env: { XYZ: 'abcdefg' },
+        env: { XYZ: 'abcdefg', PS1: '$ ' },
         spawn: run
     });
     
@@ -15,8 +15,8 @@ test('run', function (t) {
     s.pipe(concat(function (err, src) {
         t.equal(src, [
             '$ /home/test',
-            '$ boop',
-            '$ abcdefg',
+            'boop',
+            'abcdefg',
             '$ '
         ].join('\n'));
     }));

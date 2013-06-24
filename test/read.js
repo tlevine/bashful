@@ -20,13 +20,14 @@ test('wc -c < file', function (t) {
     
     var sh = bash({
         spawn: spawn,
+        env: { PS1: '$ ' },
         read: fs.createReadStream
     });
     fs.writeFileSync(tempfile, 'beep boop\n');
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(src, '$ 10\n$ ');
+        t.equal(src, '$ 10\n');
     }));
     s.write('wc -c < ' + tempfile + '\n');
     s.end();
@@ -37,13 +38,14 @@ test('cat < file | wc -c', function (t) {
     
     var sh = bash({
         spawn: spawn,
+        env: { PS1: '$ ' },
         read: fs.createReadStream
     });
     fs.writeFileSync(tempfile, 'beep boop\n');
     
     var s = sh.createStream();
     s.pipe(concat(function (err, src) {
-        t.equal(src, '$ 10\n$ ');
+        t.equal(src, '$ 10\n');
     }));
     s.write('cat < ' + tempfile + '| wc -c\n');
     s.end();
