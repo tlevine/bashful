@@ -22,7 +22,8 @@ var sh = bash({
         return rs;
     },
     write: fs.createWriteStream,
-    read: fs.createReadStream
+    read: fs.createReadStream,
+    exists: fs.exists
 });
 
 var s = sh.createStream();

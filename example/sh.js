@@ -6,7 +6,8 @@ var sh = bash({
     env: process.env,
     spawn: require('child_process').spawn,
     write: fs.createWriteStream,
-    read: fs.createReadStream
+    read: fs.createReadStream,
+    exists: fs.exists
 });
 
 var s = sh.createStream();

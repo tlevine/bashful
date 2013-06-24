@@ -4,6 +4,7 @@ var resumer = require('resumer');
 var duplexer = require('duplexer');
 var shellQuote = require('shell-quote');
 var decodePrompt = require('decode-prompt');
+var path = require('path');
 
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('inherits');
@@ -29,6 +30,7 @@ function Bash (opts) {
     this._reader = opts.read;
     this._writer = opts.write;
     this._spawner = opts.spawn;
+    this._exists = opts.exists;
 }
 
 Bash.prototype._read = function (file) {
@@ -281,6 +283,32 @@ builtins.echo = function (args) {
     tr.queue(null);
     
     return tr;
+};
+
+builtins.cd = function (args) {
+    var env = this.env;
+    var dir = args[0] === undefined ? env.HOME : args[0];
+    var edir = dir.replace(/^~\//, function () { return env.HOME + '/' });
+    edir = path.resolve(env.PWD, edir);
+    
+    var tr = resumer();
+    if (this._exists) this._exists(edir, onexists);
+    else nextTick(function () { onexists(false) });
+    
+    return tr;
+    
+    function onexists (ex) {
+        if (ex) {
+            env.PWD = edir;
+            tr.emit('exit', 0);
+            tr.queue(null);
+        }
+        else {
+            tr.queue('cd: ' + dir + ': No such file or directory\n');
+            tr.emit('exit', 1);
+            tr.queue(null);
+        }
+    }
 };
 
 builtins['true'] = function (args) {
