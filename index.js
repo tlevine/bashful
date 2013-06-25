@@ -263,9 +263,5 @@ function copy (obj) {
     return res;
 }
 
-var builtins = Bash.builtins = {};
+var builtins = require('./lib/builtins/index.js');
 builtins.eval = Bash.prototype.eval;
-builtins.echo = require('./lib/builtins/echo.js');
-builtins.cd = require('./lib/builtins/cd.js');
-builtins['true'] = require('./lib/builtins/true.js');
-builtins['false'] = require('./lib/builtins/false.js');
