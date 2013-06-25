@@ -1,13 +1,13 @@
 var test = require('tap').test;
 var bash = require('../');
-var through = require('through');
+var resumer = require('resumer');
 var concat = require('concat-stream');
 
 test('run', function (t) {
     t.plan(1);
     
     var sh = bash({
-        env: { XYZ: 'abcdefg', PS1: '$ ' },
+        env: { XYZ: 'abcdefg', PS1: '$ ', PWD: '/home/test' },
         spawn: run
     });
     
@@ -27,17 +27,10 @@ test('run', function (t) {
 });
 
 function run (cmd, args) {
-    var tr = through();
-    tr.pause();
-    tr.queue({
-        'pwd': '/home/test\n',
-        'beep': 'boop\n',
-        'echo': args.join(' ') + '\n'
-    }[cmd]);
-    tr.queue(null);
-    
-    process.nextTick(function () {
-        tr.resume();
-    });
-    return tr;
+    if (cmd === 'beep') {
+        var tr = resumer();
+        tr.queue('boop\n');
+        tr.queue(null);
+        return tr;
+    }
 }
