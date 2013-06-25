@@ -98,6 +98,7 @@ functions you can list by typing `help` in a real bash shell.
 * `eval [arg ...]`
 * `false`
 * `filename [arguments]`
+* `pwd [-LP]`
 * `true`
 
 ## not yet implemented
@@ -147,7 +148,6 @@ functions you can list by typing `help` in a real bash shell.
 * `popd [-n] [+N | -N]`
 * `printf [-v var] format [arguments]`
 * `pushd [-n] [+N | -N | dir]`
-* `pwd [-LP]`
 * `read [-ers] [-a array] [-d delim] [->`
 * `readarray [-n count] [-O origin] [-s>`
 * `readonly [-aAf] [name[=value] ...] o>`
