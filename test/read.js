@@ -33,6 +33,24 @@ test('wc -c < file', function (t) {
     s.end();
 });
 
+test('wc -c < relative_file', function (t) {
+    t.plan(1);
+    
+    var sh = bash({
+        spawn: spawn,
+        env: { PS1: '$ ', PWD: path.dirname(tempfile) },
+        read: fs.createReadStream
+    });
+    fs.writeFileSync(tempfile, 'beep boop\n');
+    
+    var s = sh.createStream();
+    s.pipe(concat(function (err, src) {
+        t.equal(src, '$ 10\n');
+    }));
+    s.write('wc -c < ' + path.basename(tempfile) + '\n');
+    s.end();
+});
+
 test('cat < file | wc -c', function (t) {
     t.plan(1);
     
