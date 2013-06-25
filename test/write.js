@@ -8,15 +8,21 @@ var spawn = require('child_process').spawn;
 
 var path = require('path');
 var mkdirp = require('mkdirp');
-var tempfile = path.join(
-    require('os').tmpDir(),
-    'bashful-test',
-    Math.floor(Math.pow(16,8)*Math.random()).toString(16)
-);
-mkdirp.sync(path.dirname(tempfile));
+
+
+var tempdir = path.join(require('os').tmpDir(), 'bashful-test');
+mkdirp.sync(tempdir);
+
+function genTempfile () {
+    return path.join(
+        tempdir,
+        Math.floor(Math.pow(16,8)*Math.random()).toString(16)
+    );
+}
 
 test('echo > file', function (t) {
     t.plan(2);
+    var tempfile = genTempfile();
     
     var sh = bash({
         spawn: spawn,
@@ -39,10 +45,11 @@ test('echo > file', function (t) {
 
 test('echo | wc -c > file', function (t) {
     t.plan(1);
+    var tempfile = genTempfile();
     
     var sh = bash({
         spawn: spawn,
-        env: { PS1: '$ ' },
+        env: { PS1: '$ ', PWD: path.dirname(tempfile) },
         write: fs.createWriteStream
     });
     
@@ -59,10 +66,11 @@ test('echo | wc -c > file', function (t) {
 
 test('pwd; echo | wc -c > file', function (t) {
     t.plan(2);
+    var tempfile = genTempfile();
     
     var sh = bash({
         spawn: spawn,
-        env: { PS1: '', PWD: __dirname },
+        env: { PS1: '', PWD: path.dirname(tempfile) },
         write: fs.createWriteStream
     });
     
@@ -72,7 +80,7 @@ test('pwd; echo | wc -c > file', function (t) {
             fs.readFileSync(tempfile, 'utf8'),
             '10\n'
         );
-        t.equal(src, __dirname + '\n10\n');
+        t.equal(src, path.dirname(tempfile) + '\n10\n');
     }));
     s.write('pwd; echo beep boop | wc -c > ' + tempfile + '\n');
     s.write('cat ' + tempfile + '\n');
@@ -81,6 +89,7 @@ test('pwd; echo | wc -c > file', function (t) {
 
 test('echo | wc -c > file; pwd', function (t) {
     t.plan(2);
+    var tempfile = genTempfile();
     
     var sh = bash({
         spawn: spawn,
@@ -103,6 +112,7 @@ test('echo | wc -c > file; pwd', function (t) {
 
 test('true > file && echo PASS', function (t) {
     t.plan(2);
+    var tempfile = genTempfile();
     
     var sh = bash({
         spawn: spawn,
@@ -121,6 +131,7 @@ test('true > file && echo PASS', function (t) {
 
 test('false > file && echo PASS', function (t) {
     t.plan(2);
+    var tempfile = genTempfile();
     
     var sh = bash({
         spawn: spawn,
@@ -139,6 +150,7 @@ test('false > file && echo PASS', function (t) {
 
 test('true > file || echo PASS', function (t) {
     t.plan(2);
+    var tempfile = genTempfile();
     
     var sh = bash({
         spawn: spawn,
@@ -157,6 +169,7 @@ test('true > file || echo PASS', function (t) {
 
 test('false > file || echo PASS', function (t) {
     t.plan(2);
+    var tempfile = genTempfile();
     
     var sh = bash({
         spawn: spawn,
