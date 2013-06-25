@@ -8,9 +8,7 @@ var path = require('path');
 
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('inherits');
-var nextTick = typeof setImmediate === 'function'
-    ? setImmediate : process.nextTick
-;
+var nextTick = require('./lib/next_tick.js');
 
 module.exports = Bash;
 inherits(Bash, EventEmitter);
@@ -257,79 +255,6 @@ Bash.prototype.eval = function (line) {
     return output;
 };
 
-var builtins = Bash.builtins = {};
-builtins.eval = Bash.prototype.eval;
-builtins.echo = function (args) {
-    var tr = resumer();
-    
-    var opts = { newline: true, 'escape': false };
-    for (var i = 0; i < args.length; i++) {
-        if (args[i] === '-n') {
-            opts.newline = false;
-            args.splice(i--, 1);
-        }
-        else if (args[i] === '-e') {
-            opts['escape'] = true;
-            args.splice(i--, 1);
-        }
-        else if (args[i] === '-E') {
-            opts['escape'] = false;
-            args.splice(i--, 1);
-        }
-    }
-    
-    if (args.length) tr.queue(args.join(' '));
-    if (opts.newline) tr.queue('\n');
-    tr.queue(null);
-    
-    return tr;
-};
-
-builtins.cd = function (args) {
-    var env = this.env;
-    var dir = args[0] === undefined ? env.HOME : args[0];
-    var edir = dir.replace(/^~\//, function () { return env.HOME + '/' });
-    edir = path.resolve(env.PWD, edir);
-    
-    var tr = resumer();
-    if (this._exists) this._exists(edir, onexists);
-    else nextTick(function () { onexists(false) });
-    
-    return tr;
-    
-    function onexists (ex) {
-        if (ex) {
-            env.PWD = edir;
-            tr.emit('exit', 0);
-            tr.queue(null);
-        }
-        else {
-            tr.queue('cd: ' + dir + ': No such file or directory\n');
-            tr.emit('exit', 1);
-            tr.queue(null);
-        }
-    }
-};
-
-builtins['true'] = function (args) {
-    return resumerExit(0);
-};
-
-builtins['false'] = function (args) {
-    return resumerExit(1);
-};
-
-function resumerExit (code) {
-    var tr = through();
-    tr.pause();
-    nextTick(function () {
-        tr.emit('exit', code);
-        tr.queue(null);
-        tr.resume();
-    });
-    return tr;
-}
-
 function copy (obj) {
     var res = {};
     Object.keys(obj).forEach(function (key) {
@@ -337,3 +262,10 @@ function copy (obj) {
     });
     return res;
 }
+
+var builtins = Bash.builtins = {};
+builtins.eval = Bash.prototype.eval;
+builtins.echo = require('./lib/builtins/echo.js');
+builtins.cd = require('./lib/builtins/cd.js');
+builtins['true'] = require('./lib/builtins/true.js');
+builtins['false'] = require('./lib/builtins/false.js');
