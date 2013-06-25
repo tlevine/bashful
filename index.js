@@ -36,7 +36,8 @@ Bash.prototype._read = function (file) {
     if (this._reader) return this._reader(file);
 };
 
-Bash.prototype._write = function (file) {
+Bash.prototype._write = function (rfile) {
+    var file = path.resolve(this.env.PWD, rfile);
     this.emit('write', file);
     if (this._writer) return this._writer(file);
 };

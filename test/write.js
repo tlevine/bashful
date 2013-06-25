@@ -70,7 +70,7 @@ test('pwd; echo | wc -c > file', function (t) {
     
     var sh = bash({
         spawn: spawn,
-        env: { PS1: '', PWD: path.dirname(tempfile) },
+        env: { PS1: '', PWD: tempdir },
         write: fs.createWriteStream
     });
     
@@ -80,10 +80,10 @@ test('pwd; echo | wc -c > file', function (t) {
             fs.readFileSync(tempfile, 'utf8'),
             '10\n'
         );
-        t.equal(src, path.dirname(tempfile) + '\n10\n');
+        t.equal(src, tempdir + '\n10\n');
     }));
-    s.write('pwd; echo beep boop | wc -c > ' + tempfile + '\n');
-    s.write('cat ' + tempfile + '\n');
+    s.write('pwd; echo beep boop | wc -c > ' + path.basename(tempfile) + '\n');
+    s.write('cat ' + path.basename(tempfile) + '\n');
     s.end();
 });
 
