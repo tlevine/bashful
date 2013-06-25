@@ -23,6 +23,7 @@ function Bash (opts) {
             : '\\w \\$ '
         ;
     }
+    if (!this.env.PWD) this.env.PWD = '/';
     this.custom = opts.custom || [];
     
     this._reader = opts.read;
@@ -31,7 +32,8 @@ function Bash (opts) {
     this._exists = opts.exists;
 }
 
-Bash.prototype._read = function (file) {
+Bash.prototype._read = function (rfile) {
+    var file = path.resolve(this.env.PWD, rfile);
     this.emit('read', file);
     if (this._reader) return this._reader(file);
 };
