@@ -66,6 +66,7 @@ Bash.prototype.createStream = function () {
             var c = buf.charCodeAt(i);
             if (c === 3) {
                 if (current) {
+                    line = '';
                     current.emit('SIGINT');
                     output.queue('^C');
                 }
@@ -74,13 +75,16 @@ Bash.prototype.createStream = function () {
                     output.queue('\n');
                     output.queue(self.getPrompt());
                 }
+                return write(buf.slice(i + 1));
             }
             else if (c === 4) {
                 if (current) current.end();
                 else this.queue(null);
+                return write(buf.slice(i + 1));
             }
             else if (c === 8) {
                 line = line.slice(0, -1);
+                return write(buf.slice(i + 1));
             }
             else if (c === 10) {
                 this.queue(line);
@@ -89,7 +93,12 @@ Bash.prototype.createStream = function () {
             }
             else line += String.fromCharCode(c);
         }
-    }, function () { this.queue(line); this.queue(null) });
+    }, inputEnd);
+    
+    function inputEnd () {
+        if (line.length) this.queue(line);
+        this.queue(null);
+    }
     
     var closed = false;
     
@@ -103,6 +112,14 @@ Bash.prototype.createStream = function () {
     
     function write (buf) {
         var line = typeof buf === 'string' ? buf : buf.toString('utf8');
+        if (line === '') {
+            if (!closed) {
+                output.queue('\n');
+                output.queue(self.getPrompt());
+            }
+            return;
+        }
+        
         var p = self.eval(line);
         p.on('SIGALRM', exit('SIGALRM', 142, 'Alarm clock'));
         p.on('SIGHUP', exit('SIGHUP', 129, 'Hangup'));
