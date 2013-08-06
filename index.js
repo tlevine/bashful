@@ -1,4 +1,3 @@
-var split = require('split');
 var through = require('through');
 var resumer = require('resumer');
 var duplexer = require('duplexer');
