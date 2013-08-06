@@ -11,7 +11,8 @@
         "decode-prompt": "~0.0.1",
         "split": "~0.2.1",
         "minimist": "~0.0.1",
-        "inherits": "~1.0.0"
+        "inherits": "~1.0.0",
+        "printf": "~0.1.2"
     },
     "devDependencies": {
         "tap": "~0.4.0",
