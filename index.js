@@ -66,7 +66,8 @@ Bash.prototype.createStream = function () {
     sp.pipe(through(write, end));
     return duplexer(sp, output);
     
-    function write (line) {
+    function write (buf) {
+        var line = typeof buf === 'string' ? buf : buf.toString('utf8');
         var p = self.eval(line);
         sp.pause();
         p.pause();
@@ -251,6 +252,7 @@ Bash.prototype.eval = function (line) {
         if (!p) {
             p = resumer();
             p.queue('No command "' + cmd + '" found\n');
+            p.queue(null);
         }
         return p;
     }
