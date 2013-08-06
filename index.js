@@ -57,26 +57,67 @@ Bash.prototype.getPrompt = function () {
 
 Bash.prototype.createStream = function () {
     var self = this;
-    var sp = split();
+    var input = through(function (buf) {
+        var c = typeof buf === 'string' ? buf.charCodeAt(0) : buf[0];
+        if (c === 3) {
+            if (current) current.emit('SIGINT');
+        }
+        else if (c === 4) {
+            this.queue(null);
+        }
+        else this.queue(buf);
+    });
+    var sp = input.pipe(split());
     var closed = false;
     
     var output = resumer();
     output.queue(self.getPrompt());
     
+    var current = null;
+    
     sp.pipe(through(write, end));
-    return duplexer(sp, output);
+    return duplexer(input, output);
     
     function write (buf) {
         var line = typeof buf === 'string' ? buf : buf.toString('utf8');
         var p = self.eval(line);
+        p.on('SIGALRM', exit('SIGALRM', 142, 'Alarm clock'));
+        p.on('SIGHUP', exit('SIGHUP', 129, 'Hangup'));
+        p.on('SIGINT', exit('SIGINT', 0, ''));
+        p.on('SIGKILL', exit('SIGKILL', 137, 'Killed'));
+        p.on('SIGPIPE', exit('SIGPIPE', 141, ''));
+        p.on('SIGPOLL', exit('SIGPOLL', 157, 'I/O possible'));
+        p.on('SIGPROF', exit('SIGPROF', 155, 'Profiling timer expired'));
+        p.on('SIGTERM', exit('SIGTERM', 143, 'Terminated'));
+        p.on('SIGUSR1', exit('SIGUSR1', 138, 'User defined signal 1'));
+        p.on('SIGUSR2', exit('SIGUSR2', 140, 'User defined signal 2'));
+        p.on('SIGVTALRM', exit('SIGVTALRM', 154, 'Virtual timer expired'));
+        p.on('SIGSTKFLT', exit('SIGSTKFLT', 144, 'Stack fault'));
+        
+        function exit (name, code, msg) {
+            return function () {
+                if (name === 'SIGKILL' || p.listeners(name).length === 1) {
+                    output.queue(msg + '\n');
+                    p.emit('exit', code);
+                }
+            };
+        }
+        
+        current = p;
         sp.pause();
         p.pause();
-        p.pipe(through(null, function () {
+        p.pipe(through(null, function () { p.emit('exit', 0) }));
+        
+        var exitCode = null;
+        p.on('exit', function (code) {
+            if (exitCode !== null) return;
+            exitCode = code;
             sp.resume();
+            current = null;
             nextTick(function () {
                 if (!closed) output.queue(self.getPrompt());
             });
-        }));
+        });
         p.pipe(output, { end: false });
         p.resume();
     }
