@@ -25,9 +25,6 @@ wonkyfs.read = function(path, opts) {
         readStream.push(String.fromCharCode(0))
       }
     }
-  } else if (path === '/dev/') {
-  } else if (path === '/dev/') {
-  } else if (path === '/dev/') {
   } else {
     readStream._read = function() {
       readStream.push(localStorage.getItem(path))
@@ -39,6 +36,7 @@ wonkyfs.read = function(path, opts) {
 wonkyfs.write = function(path, opts) {
   var writeStream = new stream.Writable();
   if (path === '/dev/null') {
+    // Do nothing
   } else if (path === '/dev/audio') {
   } else {
   }
