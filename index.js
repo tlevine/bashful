@@ -57,17 +57,40 @@ Bash.prototype.getPrompt = function () {
 
 Bash.prototype.createStream = function () {
     var self = this;
-    var input = through(function (buf) {
-        var c = typeof buf === 'string' ? buf.charCodeAt(0) : buf[0];
-        if (c === 3) {
-            if (current) current.emit('SIGINT');
+    
+    var line = '';
+    var input = through(function write (buf) {
+        if (typeof buf !== 'string') buf = buf.toString('utf8');
+        
+        for (var i = 0; i < buf.length; i++) {
+            var c = buf.charCodeAt(i);
+            if (c === 3) {
+                if (current) {
+                    current.emit('SIGINT');
+                    output.queue('^C');
+                }
+                else {
+                    line = '';
+                    output.queue('\n');
+                    output.queue(self.getPrompt());
+                }
+            }
+            else if (c === 4) {
+                if (current) current.end();
+                else this.queue(null);
+            }
+            else if (c === 8) {
+                line = line.slice(0, -1);
+            }
+            else if (c === 10) {
+                this.queue(line);
+                line = '';
+                return write(buf.slice(i + 1));
+            }
+            else line += String.fromCharCode(c);
         }
-        else if (c === 4) {
-            this.queue(null);
-        }
-        else this.queue(buf);
-    });
-    var sp = input.pipe(split());
+    }, function () { this.queue(line); this.queue(null) });
+    
     var closed = false;
     
     var output = resumer();
@@ -75,7 +98,7 @@ Bash.prototype.createStream = function () {
     
     var current = null;
     
-    sp.pipe(through(write, end));
+    input.pipe(through(write, end));
     return duplexer(input, output);
     
     function write (buf) {
@@ -104,7 +127,7 @@ Bash.prototype.createStream = function () {
         }
         
         current = p;
-        sp.pause();
+        input.pause();
         p.pause();
         p.pipe(through(null, function () { p.emit('exit', 0) }));
         
@@ -112,7 +135,7 @@ Bash.prototype.createStream = function () {
         p.on('exit', function (code) {
             if (exitCode !== null) return;
             exitCode = code;
-            sp.resume();
+            input.resume();
             current = null;
             nextTick(function () {
                 if (!closed) output.queue(self.getPrompt());
